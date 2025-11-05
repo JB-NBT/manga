@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('mangas', function (Blueprint $table) {
+            $table->boolean('est_public')->default(false)->after('note');
+            $table->decimal('note_moyenne', 3, 1)->nullable()->after('est_public');
+            $table->integer('nombre_avis')->default(0)->after('note_moyenne');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('mangas', function (Blueprint $table) {
+            $table->dropColumn(['est_public', 'note_moyenne', 'nombre_avis']);
+        });
+    }
+};
