@@ -59,6 +59,52 @@
         @yield('content')
     </main>
 
+    <footer style="
+        background-color: var(--bg-card);
+        border-top: 1px solid var(--bg-hover);
+        margin-top: 4rem;
+        padding: 2rem 0;
+        text-align: center;
+    ">
+        <div class="container" style="max-width: 1200px; margin: 0 auto; padding: 0 1rem;">
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 2rem; margin-bottom: 1rem;">
+                <a href="{{ route('mentions-legales') }}" style="color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">
+                    Mentions légales
+                </a>
+                <a href="{{ route('politique-confidentialite') }}" style="color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">
+                    Politique de confidentialité
+                </a>
+                <a href="{{ route('cgv') }}" style="color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">
+                    CGV
+                </a>
+                <a href="{{ route('contact') }}" style="color: var(--text-secondary); text-decoration: none; transition: color 0.3s;">
+                    Contact
+                </a>
+            </div>
+            
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">
+                © {{ date('Y') }} MangaCollection - Tous droits réservés
+            </p>
+        </div>
+    </footer>
+
+    <style>
+    footer a:hover {
+        color: var(--accent);
+    }
+    
+    /* Assure que le footer reste en bas même si le contenu est court */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    main {
+        flex: 1;
+    }
+</style>
+
     <!-- Script pour la date/heure -->
     <script>
         function updateDateTime() {
