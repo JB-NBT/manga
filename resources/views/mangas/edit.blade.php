@@ -16,9 +16,20 @@
             </div>
         @endif
 
-        <form action="{{ route('mangas.update', $manga) }}" method="POST" style="background-color: var(--bg-card); padding: 2rem; border-radius: 10px;">
+        <form action="{{ route('mangas.update', $manga) }}" method="POST" enctype="multipart/form-data" style="background-color: var(--bg-card); padding: 2rem; border-radius: 10px;">
             @csrf
             @method('PUT')
+
+            <div class="form-group">
+                <label for="image" class="form-label">Changer l'image de couverture</label>
+                @if($manga->image_couverture)
+                    <div style="margin-bottom: 1rem;">
+                        <img src="{{ asset('storage/' . $manga->image_couverture) }}" alt="Couverture actuelle" style="max-width: 200px; border-radius: 5px;">
+                    </div>
+                @endif
+                <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                <small style="color: var(--text-secondary); font-size: 0.85rem;">Laisser vide pour conserver l'image actuelle</small>
+            </div>
 
             <div class="form-group">
                 <label for="titre" class="form-label">Titre *</label>

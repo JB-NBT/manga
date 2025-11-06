@@ -5,7 +5,11 @@
 @section('content')
     <div style="max-width: 800px; margin: 0 auto;">
         <div style="background-color: var(--bg-card); border-radius: 10px; overflow: hidden;">
-            <div class="manga-cover" style="height: 400px;">📖</div>
+            <div class="manga-cover" style="height: 400px; background-size: cover; background-position: center; background-image: url('{{ $manga->image_couverture ? asset('storage/' . $manga->image_couverture) : '' }}');">
+                @if(!$manga->image_couverture)
+                    📖
+                @endif
+            </div>
             
             <div style="padding: 2rem;">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">

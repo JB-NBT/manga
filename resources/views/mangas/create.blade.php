@@ -16,8 +16,14 @@
             </div>
         @endif
 
-        <form action="{{ route('mangas.store') }}" method="POST" style="background-color: var(--bg-card); padding: 2rem; border-radius: 10px;">
+        <form action="{{ route('mangas.store') }}" method="POST" enctype="multipart/form-data" style="background-color: var(--bg-card); padding: 2rem; border-radius: 10px;">
             @csrf
+            
+            <div class="form-group">
+                <label for="image" class="form-label">Image de couverture</label>
+                <input type="file" name="image" id="image" class="form-control" accept="image/*">
+                <small style="color: var(--text-secondary); font-size: 0.85rem;">Format accepté : JPG, PNG, GIF (max 2MB)</small>
+            </div>
 
             <div class="form-group">
                 <label for="titre" class="form-label">Titre *</label>

@@ -1,19 +1,24 @@
 @extends('layouts.app')
-
 @section('title', 'Accueil - Manga Library')
-
 @section('content')
     <h1 style="text-align: center; margin-bottom: 2rem; color: var(--accent);">
         Découvrez les mangas de la communauté
     </h1>
-
     @if($mangas->count() > 0)
         <div class="manga-grid">
             @foreach($mangas as $manga)
                 <a href="{{ route('mangas.show', $manga) }}" style="text-decoration: none;">
                     <div class="manga-card">
-                        <div class="manga-cover">
-                            📖
+                        <div class="manga-cover" style="
+                            @if($manga->image_couverture)
+                                background-image: url('{{ asset('storage/' . $manga->image_couverture) }}');
+                                background-size: cover;
+                                background-position: center;
+                            @endif
+                        ">
+                            @if(!$manga->image_couverture)
+                                📖
+                            @endif
                         </div>
                         <div class="manga-info">
                             <h3 class="manga-title">{{ $manga->titre }}</h3>
@@ -37,7 +42,6 @@
                 </a>
             @endforeach
         </div>
-
         <div class="pagination">
             {{ $mangas->links() }}
         </div>

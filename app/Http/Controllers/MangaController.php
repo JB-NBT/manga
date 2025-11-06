@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Manga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MangaController extends Controller
 {
@@ -78,18 +79,18 @@ class MangaController extends Controller
             'nombre_tomes' => 'required|integer|min:1',
             'statut' => 'required|in:en_cours,termine,abandonne',
             'note' => 'nullable|integer|min:1|max:10',
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,bmp|max:5120', // 5MB max
         ]);
 
-        $manga = Manga::create([
-            'user_id' => Auth::id(),
-            'titre' => $validated['titre'],
-            'auteur' => $validated['auteur'],
-            'description' => $validated['description'],
-            'nombre_tomes' => $validated['nombre_tomes'],
-            'statut' => $validated['statut'],
-            'note' => $validated['note'],
-            'est_public' => false, // TOUJOURS privé par défaut
-        ]);
+        // Gestion de l'upload d'image
+        if ($request->hasFile('image')) {
+            $validated['image_couverture'] = $request->file('image')->store('mangas', 'public');
+        }
+
+        $validated['user_id'] = Auth::id();
+        $validated['est_public'] = false; // TOUJOURS privé par défaut
+
+        Manga::create($validated);
 
         return redirect()->route('mangas.my-collection')
             ->with('success', 'Manga ajouté à votre collection !');
@@ -120,6 +121,7 @@ class MangaController extends Controller
     {
         $this->authorize('update', $manga);
 
+        // Validation de base sans l'image
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'required|string|max:255',
@@ -129,9 +131,24 @@ class MangaController extends Controller
             'note' => 'nullable|integer|min:1|max:10',
         ]);
 
+        // Validation de l'image uniquement si un fichier est uploadé
+        if ($request->hasFile('image')) {
+            $request->validate([
+                'image' => 'image|mimes:jpeg,jpg,png,gif,webp|max:5120',
+            ]);
+
+            // Supprimer l'ancienne image si elle existe
+            if ($manga->image_couverture) {
+                Storage::disk('public')->delete($manga->image_couverture);
+            }
+            
+            // Stocker la nouvelle image
+            $validated['image_couverture'] = $request->file('image')->store('mangas', 'public');
+        }
+
         $manga->update($validated);
 
-        return redirect()->route('mangas.my-collection')
+        return redirect()->route('mangas.show', $manga)
             ->with('success', 'Manga mis à jour !');
     }
 
@@ -141,6 +158,12 @@ class MangaController extends Controller
     public function destroy(Manga $manga)
     {
         $this->authorize('delete', $manga);
+        
+        // Supprimer l'image si elle existe
+        if ($manga->image_couverture) {
+            Storage::disk('public')->delete($manga->image_couverture);
+        }
+        
         $manga->delete();
 
         return redirect()->route('mangas.my-collection')
