@@ -101,9 +101,23 @@ class MangaController extends Controller
      */
     public function show(Manga $manga)
     {
+        // Vérification des droits d'accès
+        if (!$manga->est_public) {
+            // Utilisateur non connecté → interdit
+            if (!Auth::check()) {
+                abort(403, 'Accès non autorisé.');
+            }
+
+            // Utilisateur connecté mais non propriétaire → interdit
+            if (Auth::id() !== $manga->user_id && !Auth::user()->hasRole('admin')) {
+                abort(403, 'Ce manga est privé.');
+            }
+        }
+
         $manga->load('user', 'avis.user');
         return view('mangas.show', compact('manga'));
     }
+
 
     /**
      * Afficher le formulaire d'édition

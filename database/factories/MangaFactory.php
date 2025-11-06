@@ -38,6 +38,44 @@ class MangaFactory extends Factory
             'nombre_tomes' => fake()->numberBetween(1, 100),
             'statut' => fake()->randomElement(['en_cours', 'termine', 'abandonne']),
             'note' => fake()->optional(0.7)->numberBetween(1, 10),
+            'est_public' => fake()->boolean(50), // 50% de chance d'être public
+            'note_moyenne' => null, // Sera calculé par updateNoteMoyenne()
+            'nombre_avis' => 0, // Sera calculé par updateNoteMoyenne()
         ];
+    }
+
+    public function public(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'est_public' => true,
+        ]);
+    }
+
+    public function private(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'est_public' => false,
+        ]);
+    }
+
+    public function enCours(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'statut' => 'en_cours',
+        ]);
+    }
+
+    public function termine(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'statut' => 'termine',
+        ]);
+    }
+
+    public function abandonne(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'statut' => 'abandonne',
+        ]);
     }
 }

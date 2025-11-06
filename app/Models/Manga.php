@@ -28,6 +28,10 @@ class Manga extends Model
         'note_moyenne' => 'decimal:1',
     ];
 
+    protected $attributes = [
+        'est_public' => false,
+    ];
+
     // Relations
     public function user()
     {
