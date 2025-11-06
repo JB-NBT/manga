@@ -24,6 +24,32 @@ class MangaTest extends TestCase
     use RefreshDatabase;
     
     /**
+     * Test que la page du manga affiche bien "One Piece".
+     *
+     * @return void
+     */
+    public function test_manga_page_displays_one_piece(): void
+    {
+        // Création d’un utilisateur
+        $user = User::factory()->create();
+
+        // Création d’un manga
+        $manga = Manga::factory()->create([
+            'user_id' => $user->id,
+            'titre' => 'One Piece',
+            'description' => 'Un manga légendaire sur les pirates.',
+            'est_public' => true,
+        ]);
+
+        // Accès à la page du manga
+        $response = $this->get("/mangas/{$manga->id}");
+
+        // Vérifie que le texte "One Piece" apparaît sur la page
+        $response->assertStatus(200);
+        $response->assertSee('One Piece');
+    }
+
+    /**
      * Test de la route edit qui retourne un code 200.
      * 
      * @access public
@@ -948,11 +974,6 @@ class MangaTest extends TestCase
     // ========================================
     // TESTS NEGATIFS AVEC assertDontSee
     // ========================================
-
-    // ========================================
-    // TESTS NEGATIFS AVEC assertDontSee
-    // ========================================
-
     /**
      * Test que la page edit ne contient pas d'informations d'un autre manga.
      * 

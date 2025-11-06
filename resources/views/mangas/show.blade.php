@@ -49,9 +49,12 @@
                         📚 {{ $manga->nombre_tomes }} tome(s)
                     </span>
                     
-                    @if($manga->note)
-                        <span class="rating">⭐ {{ $manga->note }}/10</span>
+                    @if(!is_null($manga->note_moyenne))
+                        <span class="rating">⭐ {{ $manga->note_moyenne }}/10</span>
+                    @else
+                        <span class="rating" style="color: var(--text-secondary);">⭐ Non noté</span>
                     @endif
+
                 </div>
 
                 @if($manga->description)
