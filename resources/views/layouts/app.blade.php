@@ -29,10 +29,10 @@
                         <li><a href="{{ route('mangas.create') }}" class="nav-link">Ajouter un Manga</a></li>
                     @endcan
 
-                    {{-- AJOUT : Mes demandes --}}
+                    {{-- Mes demandes de publication --}}
                     <li><a href="{{ route('publication.my-requests') }}" class="nav-link">Mes demandes</a></li>
 
-                    {{-- AJOUT : Admin --}}
+                    {{-- ADMIN --}}
                     @if(Auth::user()->hasRole('admin'))
                         <li>
                             <a href="{{ route('admin.publication.index') }}" class="nav-link" style="color: var(--warning);">
@@ -44,7 +44,7 @@
                     <li>
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                             @csrf
-                            <button type="submit" class="nav-link" style="background: none; border: none; cursor: pointer;">
+                            <button type="submit" class="nav-link">
                                 Déconnexion ({{ Auth::user()->name }})
                             </button>
                         </form>
@@ -105,7 +105,6 @@
         color: var(--accent);
     }
     
-    /* Assure que le footer reste en bas même si le contenu est court */
     body {
         display: flex;
         flex-direction: column;
@@ -137,4 +136,3 @@
     </script>
 </body>
 </html>
-
