@@ -16,36 +16,44 @@
             </a>
             
             <ul class="navbar-nav">
-                <li><span class="datetime" id="datetime"></span></li>
+                <!-- Date et heure -->
+                <li class="datetime-wrapper">
+                    <span class="datetime" id="datetime"></span>
+                </li>
                 
                 @guest
                     <li><a href="{{ route('login') }}" class="nav-link">Connexion</a></li>
                     <li><a href="{{ route('register') }}" class="btn-primary">Inscription</a></li>
                 @else
+                    <!-- Navigation principale -->
                     <li><a href="{{ route('home') }}" class="nav-link">Accueil</a></li>
                     <li><a href="{{ route('mangas.my-collection') }}" class="nav-link">Ma Collection</a></li>
                     
                     @can('create manga')
-                        <li><a href="{{ route('mangas.create') }}" class="nav-link">Ajouter un Manga</a></li>
+                        <li><a href="{{ route('mangas.create') }}" class="nav-link">Ajouter</a></li>
                     @endcan
 
                     {{-- Mes demandes de publication --}}
                     <li><a href="{{ route('publication.my-requests') }}" class="nav-link">Mes demandes</a></li>
 
-                    {{-- ADMIN --}}
+                    {{-- ADMIN - Séparateur visuel --}}
                     @if(Auth::user()->hasRole('admin'))
+                        <li class="nav-separator"></li>
                         <li>
-                            <a href="{{ route('admin.publication.index') }}" class="nav-link" style="color: var(--warning);">
-                                👑 Admin
+                            <a href="{{ route('admin.publication.index') }}" class="nav-link nav-link-admin" title="Panel Admin">
+                                <span class="admin-badge">👑 Admin</span>
                             </a>
                         </li>
                     @endif
                     
-                    <li>
+                    <!-- Déconnexion -->
+                    <li class="nav-separator"></li>
+                    <li class="user-menu">
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                             @csrf
-                            <button type="submit" class="nav-link">
-                                Déconnexion ({{ Auth::user()->name }})
+                            <button type="submit" class="nav-link nav-link-logout">
+                                <span class="user-name">{{ Auth::user()->name }}</span>
+                                <span class="logout-icon">🚪</span>
                             </button>
                         </form>
                     </li>
@@ -101,6 +109,7 @@
     </footer>
 
     <style>
+    /* Footer */
     footer a:hover {
         color: var(--accent);
     }
@@ -113,6 +122,108 @@
     
     main {
         flex: 1;
+    }
+
+    /* Navbar améliorée */
+    .navbar-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .datetime-wrapper {
+        margin-right: 1rem;
+        padding-right: 1rem;
+        border-right: 1px solid var(--border);
+    }
+
+    .nav-separator {
+        width: 1px;
+        height: 30px;
+        background-color: var(--border);
+        margin: 0 0.5rem;
+    }
+
+    .nav-link-admin {
+        position: relative;
+        animation: glow 2s ease-in-out infinite;
+    }
+
+    .admin-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, var(--warning), var(--accent));
+        color: #000;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 8px rgba(255, 209, 102, 0.3);
+    }
+
+    .nav-link-admin:hover .admin-badge {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(255, 209, 102, 0.5);
+    }
+
+    @keyframes glow {
+        0%, 100% { 
+            filter: brightness(1); 
+        }
+        50% { 
+            filter: brightness(1.2); 
+        }
+    }
+
+    .user-menu {
+        margin-left: auto;
+    }
+
+    .nav-link-logout {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+    }
+
+    .logout-icon {
+        font-size: 1.1rem;
+    }
+
+    .nav-link-logout:hover {
+        background-color: var(--accent);
+        color: var(--text-primary);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .navbar .container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .navbar-nav {
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .datetime-wrapper {
+            width: 100%;
+            text-align: center;
+            border-right: none;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-separator {
+            display: none;
+        }
     }
     </style>
 

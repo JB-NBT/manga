@@ -7,42 +7,63 @@ use App\Models\Manga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Class TomeController
+ *
+ * Gère les tomes associés à un manga.
+ *
+ * @package App\Http\Controllers
+ */
 class TomeController extends Controller
 {
+    /**
+     * Constructeur - nécessite une authentification.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Afficher la liste des tomes d'un manga
+     * Affiche la liste des tomes d'un manga.
+     *
+     * @param Manga $manga
+     * @return \Illuminate\Contracts\View\View
      */
     public function index(Manga $manga)
     {
-        // Vérifier l'accès
-        if (!$manga->est_public && $manga->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+        if (
+            !$manga->est_public &&
+            $manga->user_id !== Auth::id() &&
+            !Auth::user()->hasRole('admin')
+        ) {
             abort(403, 'Accès non autorisé.');
         }
 
         $tomes = $manga->tomes()->orderBy('numero')->get();
-        
+
         return view('tomes.index', compact('manga', 'tomes'));
     }
 
     /**
-     * Créer automatiquement les tomes pour un manga
+     * Génère automatiquement les tomes d'un manga (du tome 1 au tome total).
+     *
+     * @param Manga $manga
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function generateTomes(Manga $manga)
     {
-        // Vérifier que l'utilisateur est propriétaire
-        if ($manga->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+        if (
+            $manga->user_id !== Auth::id() &&
+            !Auth::user()->hasRole('admin')
+        ) {
             abort(403, 'Action non autorisée.');
         }
 
-        // Supprimer les tomes existants
         $manga->tomes()->delete();
 
-        // Créer les nouveaux tomes
         for ($i = 1; $i <= $manga->nombre_tomes; $i++) {
             Tome::create([
                 'manga_id' => $manga->id,
@@ -56,12 +77,17 @@ class TomeController extends Controller
     }
 
     /**
-     * Marquer un tome comme possédé/non possédé
+     * Inverse l’état "possédé" d’un tome.
+     *
+     * @param Tome $tome
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function togglePossede(Tome $tome)
     {
-        // Vérifier que l'utilisateur est propriétaire du manga
-        if ($tome->manga->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+        if (
+            $tome->manga->user_id !== Auth::id() &&
+            !Auth::user()->hasRole('admin')
+        ) {
             abort(403, 'Action non autorisée.');
         }
 
@@ -74,12 +100,18 @@ class TomeController extends Controller
     }
 
     /**
-     * Mettre à jour un tome
+     * Met à jour les informations d’un tome.
+     *
+     * @param Request $request
+     * @param Tome    $tome
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Tome $tome)
     {
-        // Vérifier que l'utilisateur est propriétaire du manga
-        if ($tome->manga->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+        if (
+            $tome->manga->user_id !== Auth::id() &&
+            !Auth::user()->hasRole('admin')
+        ) {
             abort(403, 'Action non autorisée.');
         }
 
@@ -94,3 +126,4 @@ class TomeController extends Controller
         return redirect()->back()->with('success', 'Tome mis à jour avec succès !');
     }
 }
+

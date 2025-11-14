@@ -7,29 +7,42 @@ use App\Models\Manga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Class PublicationRequestController
+ *
+ * Gère les demandes de publication des mangas.
+ *
+ * @package App\Http\Controllers
+ */
 class PublicationRequestController extends Controller
 {
+    /**
+     * Constructeur - exige que l'utilisateur soit connecté.
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Créer une demande de publication
+     * Crée une demande de publication pour un manga privé.
+     *
+     * @param Request $request
+     * @param Manga   $manga
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request, Manga $manga)
     {
-        // Vérifier que l'utilisateur est propriétaire du manga
         if ($manga->user_id !== Auth::id()) {
             abort(403, 'Vous ne pouvez pas demander la publication de ce manga.');
         }
 
-        // Vérifier que le manga n'est pas déjà public
         if ($manga->est_public) {
             return redirect()->back()->with('error', 'Ce manga est déjà public.');
         }
 
-        // Vérifier qu'il n'y a pas déjà une demande en attente
         $existingRequest = PublicationRequest::where('manga_id', $manga->id)
             ->where('statut', 'en_attente')
             ->first();
@@ -53,7 +66,9 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Afficher toutes les demandes (admin)
+     * Liste toutes les demandes en attente (Admin uniquement).
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
@@ -70,7 +85,11 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Approuver une demande
+     * Approuve une demande de publication et rend le manga public.
+     *
+     * @param Request              $request
+     * @param PublicationRequest   $publicationRequest
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function approve(Request $request, PublicationRequest $publicationRequest)
     {
@@ -88,14 +107,17 @@ class PublicationRequestController extends Controller
             'date_traitement' => now(),
         ]);
 
-        // Rendre le manga public
         $publicationRequest->manga->update(['est_public' => true]);
 
         return redirect()->back()->with('success', 'Demande approuvée ! Le manga est maintenant public.');
     }
 
     /**
-     * Refuser une demande
+     * Refuse une demande de publication.
+     *
+     * @param Request              $request
+     * @param PublicationRequest   $publicationRequest
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function reject(Request $request, PublicationRequest $publicationRequest)
     {
@@ -117,7 +139,9 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Afficher les demandes de l'utilisateur
+     * Affiche les demandes de publication de l'utilisateur connecté.
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function myRequests()
     {
@@ -129,3 +153,4 @@ class PublicationRequestController extends Controller
         return view('mangas.my-requests', compact('requests'));
     }
 }
+

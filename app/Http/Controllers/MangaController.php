@@ -7,15 +7,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Class MangaController
+ *
+ * Gère la création, l'affichage, la modification et la suppression de mangas.
+ *
+ * @package App\Http\Controllers
+ */
 class MangaController extends Controller
 {
+    /**
+     * Constructeur - protège les routes sauf index() et show().
+     *
+     * @return void
+     */
     public function __construct()
     {
         $this->middleware('auth')->except(['index', 'show']);
     }
 
     /**
-     * Page d'accueil - Affiche uniquement les mangas publics
+     * Page d'accueil : liste uniquement les mangas publics.
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
@@ -28,28 +42,23 @@ class MangaController extends Controller
     }
 
     /**
-     * Ma Collection - Affiche les mangas privés de l'utilisateur
-     * ADMIN : voit TOUS les mangas (publics et privés)
+     * Affiche la collection de l'utilisateur.
+     * Admin : tous les mangas.
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function myCollection()
     {
         $user = Auth::user();
 
-        // Si admin : voir TOUS les mangas
         if ($user->hasRole('admin')) {
-            $mangas = Manga::with('user')
-                ->orderBy('created_at', 'desc')
-                ->paginate(12);
-            
+            $mangas = Manga::with('user')->orderBy('created_at', 'desc')->paginate(12);
             $title = "Tous les mangas (Admin)";
-        } 
-        // Si user : voir uniquement SES mangas privés
-        else {
+        } else {
             $mangas = Manga::where('user_id', $user->id)
                 ->where('est_public', false)
                 ->orderBy('created_at', 'desc')
                 ->paginate(12);
-            
             $title = "Ma Collection";
         }
 
@@ -57,7 +66,9 @@ class MangaController extends Controller
     }
 
     /**
-     * Afficher le formulaire de création
+     * Affiche le formulaire de création.
+     *
+     * @return \Illuminate\Contracts\View\View
      */
     public function create()
     {
@@ -66,7 +77,10 @@ class MangaController extends Controller
     }
 
     /**
-     * Enregistrer un nouveau manga (toujours privé par défaut)
+     * Enregistre un nouveau manga privé.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request)
     {
@@ -79,17 +93,16 @@ class MangaController extends Controller
             'nombre_tomes' => 'required|integer|min:1',
             'statut' => 'required|in:en_cours,termine,abandonne',
             'note' => 'nullable|integer|min:1|max:10',
-            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,bmp|max:5120', // 5MB max
+            'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,bmp|max:5120',
             'url_lecture_index' => 'nullable|url|max:500',
         ]);
 
-        // Gestion de l'upload d'image
         if ($request->hasFile('image')) {
             $validated['image_couverture'] = $request->file('image')->store('mangas', 'public');
         }
 
         $validated['user_id'] = Auth::id();
-        $validated['est_public'] = false; // TOUJOURS privé par défaut
+        $validated['est_public'] = false;
 
         Manga::create($validated);
 
@@ -98,45 +111,51 @@ class MangaController extends Controller
     }
 
     /**
-     * Afficher un manga
+     * Affiche un manga, si l'utilisateur est autorisé.
+     *
+     * @param Manga $manga
+     * @return \Illuminate\Contracts\View\View
      */
     public function show(Manga $manga)
     {
-        // Vérification des droits d'accès
         if (!$manga->est_public) {
-            // Utilisateur non connecté → interdit
             if (!Auth::check()) {
                 abort(403, 'Accès non autorisé.');
             }
-
-            // Utilisateur connecté mais non propriétaire → interdit
             if (Auth::id() !== $manga->user_id && !Auth::user()->hasRole('admin')) {
                 abort(403, 'Ce manga est privé.');
             }
         }
 
         $manga->load('user', 'avis.user');
+
         return view('mangas.show', compact('manga'));
     }
 
-
     /**
-     * Afficher le formulaire d'édition
+     * Formulaire d'édition.
+     *
+     * @param Manga $manga
+     * @return \Illuminate\Contracts\View\View
      */
     public function edit(Manga $manga)
     {
         $this->authorize('update', $manga);
+
         return view('mangas.edit', compact('manga'));
     }
 
     /**
-     * Mettre à jour un manga
+     * Met à jour un manga.
+     *
+     * @param Request $request
+     * @param Manga $manga
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Manga $manga)
     {
         $this->authorize('update', $manga);
 
-        // Validation de base sans l'image
         $validated = $request->validate([
             'titre' => 'required|string|max:255',
             'auteur' => 'required|string|max:255',
@@ -147,18 +166,15 @@ class MangaController extends Controller
             'url_lecture_index' => 'nullable|url|max:500',
         ]);
 
-        // Validation de l'image uniquement si un fichier est uploadé
         if ($request->hasFile('image')) {
             $request->validate([
                 'image' => 'image|mimes:jpeg,jpg,png,gif,webp|max:5120',
             ]);
 
-            // Supprimer l'ancienne image si elle existe
             if ($manga->image_couverture) {
                 Storage::disk('public')->delete($manga->image_couverture);
             }
-            
-            // Stocker la nouvelle image
+
             $validated['image_couverture'] = $request->file('image')->store('mangas', 'public');
         }
 
@@ -169,20 +185,23 @@ class MangaController extends Controller
     }
 
     /**
-     * Supprimer un manga
+     * Supprime un manga.
+     *
+     * @param Manga $manga
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function destroy(Manga $manga)
     {
         $this->authorize('delete', $manga);
-        
-        // Supprimer l'image si elle existe
+
         if ($manga->image_couverture) {
             Storage::disk('public')->delete($manga->image_couverture);
         }
-        
+
         $manga->delete();
 
         return redirect()->route('mangas.my-collection')
             ->with('success', 'Manga supprimé !');
     }
 }
+

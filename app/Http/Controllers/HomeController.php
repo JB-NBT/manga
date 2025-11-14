@@ -4,10 +4,17 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+/**
+ * Class HomeController
+ *
+ * Gère l'affichage de la page d'accueil utilisateur.
+ *
+ * @package App\Http\Controllers
+ */
 class HomeController extends Controller
 {
     /**
-     * Create a new controller instance.
+     * Constructeur - Vérifie que l'utilisateur est authentifié.
      *
      * @return void
      */
@@ -17,7 +24,7 @@ class HomeController extends Controller
     }
 
     /**
-     * Show the application dashboard.
+     * Affiche le tableau de bord utilisateur.
      *
      * @return \Illuminate\Contracts\Support\Renderable
      */
@@ -26,3 +33,4 @@ class HomeController extends Controller
         return view('home');
     }
 }
+

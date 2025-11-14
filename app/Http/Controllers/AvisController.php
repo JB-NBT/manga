@@ -9,13 +9,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AvisController extends Controller
 {
+    // ========================================
+    // CONSTRUCTEUR : applique le middleware d'authentification
+    // ========================================
     public function __construct()
     {
         $this->middleware('auth');
     }
 
+    // ========================================
+    // ENREGISTRER UN NOUVEL AVIS
+    // ========================================
     /**
-     * Stocker un nouvel avis
+     * Stocker un nouvel avis pour un manga public
+     *
+     * @param Request $request
+     * @param Manga   $manga
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function store(Request $request, Manga $manga)
     {
@@ -33,11 +43,13 @@ class AvisController extends Controller
             return redirect()->back()->with('error', 'Vous avez déjà noté ce manga.');
         }
 
+        // Validation des données
         $validated = $request->validate([
             'note' => 'required|integer|min:1|max:10',
             'commentaire' => 'nullable|string|max:1000',
         ]);
 
+        // Création de l'avis
         Avis::create([
             'manga_id' => $manga->id,
             'user_id' => Auth::id(),
@@ -46,69 +58,95 @@ class AvisController extends Controller
             'modere' => false, // Par défaut non modéré
         ]);
 
-        // Mettre à jour la note moyenne du manga
+        // Mise à jour de la note moyenne du manga
         $manga->updateNoteMoyenne();
 
         return redirect()->back()->with('success', 'Votre avis a été ajouté avec succès !');
     }
 
+    // ========================================
+    // MODIFIER UN AVIS EXISTANT
+    // ========================================
     /**
      * Modifier un avis existant
+     *
+     * @param Request $request
+     * @param Avis    $avis
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function update(Request $request, Avis $avis)
-    {
-        // Vérifier que l'utilisateur est propriétaire de l'avis
-        if ($avis->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
-            abort(403, 'Action non autorisée.');
-        }
-
-        $validated = $request->validate([
-            'note' => 'required|integer|min:1|max:10',
-            'commentaire' => 'nullable|string|max:1000',
-        ]);
-
-        $avis->update([
-            'note' => $validated['note'],
-            'commentaire' => $validated['commentaire'] ?? null,
-            'modere' => false, // Repasser en non modéré après modification
-        ]);
-
-        // Mettre à jour la note moyenne
-        $avis->manga->updateNoteMoyenne();
-
-        return redirect()->back()->with('success', 'Votre avis a été modifié avec succès !');
-    }
-
-    /**
-     * Supprimer un avis
-     */
-    public function destroy(Avis $avis)
     {
         // Vérifier que l'utilisateur est propriétaire ou admin
         if ($avis->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
             abort(403, 'Action non autorisée.');
         }
 
+        // Validation des données
+        $validated = $request->validate([
+            'note' => 'required|integer|min:1|max:10',
+            'commentaire' => 'nullable|string|max:1000',
+        ]);
+
+        // Mise à jour de l'avis
+        $avis->update([
+            'note' => $validated['note'],
+            'commentaire' => $validated['commentaire'] ?? null,
+            'modere' => false, // Repasser en non modéré après modification
+        ]);
+
+        // Mise à jour de la note moyenne du manga
+        $avis->manga->updateNoteMoyenne();
+
+        return redirect()->back()->with('success', 'Votre avis a été modifié avec succès !');
+    }
+
+    // ========================================
+    // SUPPRIMER UN AVIS
+    // ========================================
+    /**
+     * Supprimer un avis
+     *
+     * @param Avis $avis
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Avis $avis)
+    {
+        // Vérifier l'autorisation (propriétaire ou admin)
+        if ($avis->user_id !== Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Action non autorisée.');
+        }
+
         $manga = $avis->manga;
+
+        // Suppression de l'avis
         $avis->delete();
 
-        // Mettre à jour la note moyenne
+        // Mise à jour de la note moyenne
         $manga->updateNoteMoyenne();
 
         return redirect()->back()->with('success', 'Avis supprimé avec succès !');
     }
 
+    // ========================================
+    // MODÉRER UN AVIS (ADMIN UNIQUEMENT)
+    // ========================================
     /**
-     * Modérer un avis (admin uniquement)
+     * Marquer un avis comme modéré
+     *
+     * @param Avis $avis
+     * @return \Illuminate\Http\RedirectResponse
      */
     public function moderate(Avis $avis)
     {
+        // Autorisation admin
         if (!Auth::user()->hasRole('admin')) {
             abort(403, 'Action non autorisée.');
         }
 
+        // Mise à jour
         $avis->update(['modere' => true]);
 
         return redirect()->back()->with('success', 'Avis modéré avec succès !');
     }
 }
+
