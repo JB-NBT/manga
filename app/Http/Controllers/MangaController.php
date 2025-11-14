@@ -80,6 +80,7 @@ class MangaController extends Controller
             'statut' => 'required|in:en_cours,termine,abandonne',
             'note' => 'nullable|integer|min:1|max:10',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,bmp|max:5120', // 5MB max
+            'url_lecture_index' => 'nullable|url|max:500',
         ]);
 
         // Gestion de l'upload d'image
@@ -101,9 +102,23 @@ class MangaController extends Controller
      */
     public function show(Manga $manga)
     {
+        // Vérification des droits d'accès
+        if (!$manga->est_public) {
+            // Utilisateur non connecté → interdit
+            if (!Auth::check()) {
+                abort(403, 'Accès non autorisé.');
+            }
+
+            // Utilisateur connecté mais non propriétaire → interdit
+            if (Auth::id() !== $manga->user_id && !Auth::user()->hasRole('admin')) {
+                abort(403, 'Ce manga est privé.');
+            }
+        }
+
         $manga->load('user', 'avis.user');
         return view('mangas.show', compact('manga'));
     }
+
 
     /**
      * Afficher le formulaire d'édition
@@ -129,6 +144,7 @@ class MangaController extends Controller
             'nombre_tomes' => 'required|integer|min:1',
             'statut' => 'required|in:en_cours,termine,abandonne',
             'note' => 'nullable|integer|min:1|max:10',
+            'url_lecture_index' => 'nullable|url|max:500',
         ]);
 
         // Validation de l'image uniquement si un fichier est uploadé

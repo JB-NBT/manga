@@ -22,7 +22,7 @@
             <div class="form-group">
                 <label for="image" class="form-label">Image de couverture</label>
                 <input type="file" name="image" id="image" class="form-control" accept="image/*">
-                <small style="color: var(--text-secondary); font-size: 0.85rem;">Format accepté : JPG, PNG, GIF (max 2MB)</small>
+                <small style="color: var(--text-secondary); font-size: 0.85rem;">Format accepté : JPG, PNG, GIF (max 5MB)</small>
             </div>
 
             <div class="form-group">
@@ -57,6 +57,24 @@
             <div class="form-group">
                 <label for="note" class="form-label">Note (sur 10)</label>
                 <input type="number" name="note" id="note" class="form-control" value="{{ old('note') }}" min="1" max="10">
+            </div>
+
+            <div class="form-group">
+                <label for="url_lecture_index" class="form-label">
+                    Lien de lecture (optionnel)
+                    <span style="color: var(--text-secondary); font-size: 0.85rem; font-weight: normal;">
+                        - Page d'accueil du manga
+                    </span>
+                </label>
+                <input type="url" 
+                       name="url_lecture_index" 
+                       id="url_lecture_index" 
+                       class="form-control" 
+                       value="{{ old('url_lecture_index') }}"
+                       placeholder="https://exemple.com/manga/one-piece">
+                <small style="color: var(--text-secondary); font-size: 0.85rem;">
+                    Lien vers la page index du manga sur votre site de lecture préféré
+                </small>
             </div>
 
             <div style="display: flex; gap: 1rem;">
