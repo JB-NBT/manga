@@ -28,6 +28,18 @@
                     @can('create manga')
                         <li><a href="{{ route('mangas.create') }}" class="nav-link">Ajouter un Manga</a></li>
                     @endcan
+
+                    {{-- AJOUT : Mes demandes --}}
+                    <li><a href="{{ route('publication.my-requests') }}" class="nav-link">Mes demandes</a></li>
+
+                    {{-- AJOUT : Admin --}}
+                    @if(Auth::user()->hasRole('admin'))
+                        <li>
+                            <a href="{{ route('admin.publication.index') }}" class="nav-link" style="color: var(--warning);">
+                                👑 Admin
+                            </a>
+                        </li>
+                    @endif
                     
                     <li>
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
@@ -103,7 +115,7 @@
     main {
         flex: 1;
     }
-</style>
+    </style>
 
     <!-- Script pour la date/heure -->
     <script>
@@ -125,3 +137,4 @@
     </script>
 </body>
 </html>
+

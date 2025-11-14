@@ -59,6 +59,7 @@
                 <input type="number" name="note" id="note" class="form-control" value="{{ old('note') }}" min="1" max="10">
             </div>
 
+            {{-- AJOUT DU CHAMP url_lecture_index --}}
             <div class="form-group">
                 <label for="url_lecture_index" class="form-label">
                     Lien de lecture (optionnel)
@@ -76,6 +77,7 @@
                     Lien vers la page index du manga sur votre site de lecture préféré
                 </small>
             </div>
+            {{-- FIN AJOUT --}}
 
             <div style="display: flex; gap: 1rem;">
                 <button type="submit" class="btn-primary" style="flex: 1;">Ajouter le manga</button>
@@ -86,3 +88,4 @@
         </form>
     </div>
 @endsection
+
