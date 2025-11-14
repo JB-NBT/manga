@@ -17,7 +17,7 @@
             
             <ul class="navbar-nav">
                 <li><span class="datetime" id="datetime"></span></li>
-                
+                    <li><a href="docs/index.html" class="nav-link">Documentation</a></li>
                 @guest
                     <li><a href="{{ route('login') }}" class="nav-link">Connexion</a></li>
                     <li><a href="{{ route('register') }}" class="btn-primary">Inscription</a></li>
