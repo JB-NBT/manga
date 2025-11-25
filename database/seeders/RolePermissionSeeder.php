@@ -33,16 +33,16 @@ class RolePermissionSeeder extends Seeder
             'create avis',
             'edit own avis',
             'delete own avis',
+            'moderate avis',
             
             // Permissions modérateur
-            'edit any manga',           // Modifier n'importe quel manga
-            'approve publications',      // Approuver les publications
-            'republish expired manga',   // Republier les mangas expirés
+            'edit any manga',           //MODÉRATEUR : Modifier n'importe quel manga
+            'approve publications',      //MODÉRATEUR : Approuver les publications
+            'republish expired manga',   //MODÉRATEUR : Republier les mangas expirés
             
             // Permissions admin
             'manage users',
-            'delete any manga',          // Supprimer n'importe quel manga
-            'delete any avis',
+            'delete any manga',          //ADMIN UNIQUEMENT : Supprimer n'importe quel manga
             'view admin panel',
         ];
 
@@ -54,7 +54,7 @@ class RolePermissionSeeder extends Seeder
         // CRÉATION DES RÔLES
         // ========================================
 
-        // 🔴 RÔLE ADMIN (gestion complète)
+        // 🔴 RÔLE ADMIN (suppression uniquement + gestion users)
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
         $adminRole->givePermissionTo([
             'view own mangas',
@@ -66,16 +66,13 @@ class RolePermissionSeeder extends Seeder
             'create avis',
             'edit own avis',
             'delete own avis',
-            'edit any manga',
-            'approve publications',
-            'republish expired manga',
+            'moderate avis',
             'manage users',
-            'delete any manga',
-            'delete any avis',
+            'delete any manga',          // ✅ ADMIN : Suppression uniquement
             'view admin panel',
         ]);
 
-        // 🟡 RÔLE MODÉRATEUR (gestion contenu)
+        // 🟡 RÔLE MODÉRATEUR (gestion contenu + validation)
         $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
         $moderatorRole->givePermissionTo([
             'view own mangas',
@@ -87,10 +84,11 @@ class RolePermissionSeeder extends Seeder
             'create avis',
             'edit own avis',
             'delete own avis',
-            'edit any manga',           // ✅ Modifier n'importe quel manga
-            'approve publications',      // ✅ Valider les publications
-            'republish expired manga',   // ✅ Republier les mangas expirés
-            'delete any avis',
+            'moderate avis',
+            'edit any manga',           // ✅ MODÉRATEUR : Modifier tous les mangas
+            'approve publications',      // ✅ MODÉRATEUR : Valider les publications
+            'republish expired manga',   // ✅ MODÉRATEUR : Republier les mangas expirés
+            // ❌ PAS de 'delete any manga'
         ]);
 
         // 🟢 RÔLE USER (utilisateur enregistré)
@@ -162,12 +160,12 @@ class RolePermissionSeeder extends Seeder
         echo "🔴 ADMIN:\n";
         echo "   Email    : admin@manga.local\n";
         echo "   Password : password123\n";
-        echo "   Accès    : Gestion complète + Suppression mangas\n\n";
+        echo "   Accès    : SUPPRESSION mangas uniquement\n\n";
         
         echo "🟡 MODÉRATEUR:\n";
         echo "   Email    : moderator@manga.local\n";
         echo "   Password : password123\n";
-        echo "   Accès    : Modification tous mangas + Validation publications + Republication\n\n";
+        echo "   Accès    : MODIFICATION tous mangas + VALIDATION publications + REPUBLICATION\n\n";
         
         echo "🟢 USER 1:\n";
         echo "   Email    : user@manga.local\n";

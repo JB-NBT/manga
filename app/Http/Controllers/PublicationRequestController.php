@@ -8,30 +8,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * Class PublicationRequestController
- *
- * Gère les demandes de publication des mangas.
- *
- * @package App\Http\Controllers
+ * Gère les demandes de publication des mangas
+ * Validation = Modérateur uniquement
  */
 class PublicationRequestController extends Controller
 {
-    /**
-     * Constructeur - exige que l'utilisateur soit connecté.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
     /**
-     * Crée une demande de publication pour un manga privé.
-     *
-     * @param Request $request
-     * @param Manga   $manga
-     * @return \Illuminate\Http\RedirectResponse
+     * Crée une demande de publication pour un manga privé
      */
     public function store(Request $request, Manga $manga)
     {
@@ -66,14 +54,12 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Liste toutes les demandes en attente (Admin uniquement).
-     *
-     * @return \Illuminate\Contracts\View\View
+     * Liste toutes les demandes en attente (Modérateur uniquement)
      */
     public function index()
     {
-        if (!Auth::user()->hasRole('admin')) {
-            abort(403, 'Action non autorisée.');
+        if (!Auth::user()->hasPermissionTo('approve publications')) {
+            abort(403, 'Accès réservé aux modérateurs.');
         }
 
         $requests = PublicationRequest::with(['manga', 'user'])
@@ -85,16 +71,13 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Approuve une demande de publication et rend le manga public.
-     *
-     * @param Request              $request
-     * @param PublicationRequest   $publicationRequest
-     * @return \Illuminate\Http\RedirectResponse
+     * Approuve une demande de publication et rend le manga public
+     * (Modérateur uniquement)
      */
     public function approve(Request $request, PublicationRequest $publicationRequest)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            abort(403, 'Action non autorisée.');
+        if (!Auth::user()->hasPermissionTo('approve publications')) {
+            abort(403, 'Action réservée aux modérateurs.');
         }
 
         $validated = $request->validate([
@@ -107,22 +90,22 @@ class PublicationRequestController extends Controller
             'date_traitement' => now(),
         ]);
 
-        $publicationRequest->manga->update(['est_public' => true]);
+        $publicationRequest->manga->update([
+            'est_public' => true,
+            'date_derniere_republication' => now(), // Initialise la date de publication
+        ]);
 
         return redirect()->back()->with('success', 'Demande approuvée ! Le manga est maintenant public.');
     }
 
     /**
-     * Refuse une demande de publication.
-     *
-     * @param Request              $request
-     * @param PublicationRequest   $publicationRequest
-     * @return \Illuminate\Http\RedirectResponse
+     * Refuse une demande de publication
+     * (Modérateur uniquement)
      */
     public function reject(Request $request, PublicationRequest $publicationRequest)
     {
-        if (!Auth::user()->hasRole('admin')) {
-            abort(403, 'Action non autorisée.');
+        if (!Auth::user()->hasPermissionTo('approve publications')) {
+            abort(403, 'Action réservée aux modérateurs.');
         }
 
         $validated = $request->validate([
@@ -139,9 +122,7 @@ class PublicationRequestController extends Controller
     }
 
     /**
-     * Affiche les demandes de publication de l'utilisateur connecté.
-     *
-     * @return \Illuminate\Contracts\View\View
+     * Affiche les demandes de publication de l'utilisateur connecté
      */
     public function myRequests()
     {
@@ -153,4 +134,3 @@ class PublicationRequestController extends Controller
         return view('mangas.my-requests', compact('requests'));
     }
 }
-

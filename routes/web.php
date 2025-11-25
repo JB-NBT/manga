@@ -4,6 +4,7 @@ use App\Http\Controllers\MangaController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\PublicationRequestController;
 use App\Http\Controllers\TomeController;
+use App\Http\Controllers\Admin\CopyrightController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
@@ -38,16 +39,23 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/mangas/{manga}', [MangaController::class, 'destroy'])->name('mangas.destroy');
 
     // ========================================
+    // REPUBLICATION (Modérateur uniquement)
+    // ========================================
+    Route::post('/mangas/{manga}/republish', [MangaController::class, 'republish'])
+        ->name('mangas.republish')
+        ->middleware('permission:republish expired manga');
+
+    // ========================================
     // ROUTES AVIS
     // ========================================
     Route::post('/mangas/{manga}/avis', [AvisController::class, 'store'])->name('avis.store');
     Route::put('/avis/{avis}', [AvisController::class, 'update'])->name('avis.update');
     Route::delete('/avis/{avis}', [AvisController::class, 'destroy'])->name('avis.destroy');
 
-    // Modération des avis (Admin uniquement)
+    // Modération des avis (Modérateur)
     Route::post('/avis/{avis}/moderate', [AvisController::class, 'moderate'])
         ->name('avis.moderate')
-        ->middleware('role:admin');
+        ->middleware('permission:moderate avis');
 
     // ========================================
     // DEMANDES DE PUBLICATION
@@ -58,8 +66,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mes-demandes', [PublicationRequestController::class, 'myRequests'])
         ->name('publication.my-requests');
 
-    // ---------- ADMIN : gestion des demandes ----------
-    Route::middleware('role:admin')->prefix('admin')->group(function () {
+    // ---------- MODÉRATEUR : gestion des demandes ----------
+    Route::middleware('permission:approve publications')->prefix('admin')->group(function () {
         Route::get('/demandes-publication', [PublicationRequestController::class, 'index'])
             ->name('admin.publication.index');
 
@@ -68,6 +76,14 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/demandes-publication/{publicationRequest}/reject', [PublicationRequestController::class, 'reject'])
             ->name('admin.publication.reject');
+    });
+
+    // ========================================
+    // GESTION COPYRIGHT (Modérateur uniquement)
+    // ========================================
+    Route::middleware('permission:republish expired manga')->group(function () {
+        Route::get('/admin/copyright', [CopyrightController::class, 'index'])
+            ->name('admin.copyright.management');
     });
 
     // ========================================
@@ -107,4 +123,3 @@ Route::post('/contact/send', function (Request $request) {
     return redirect()->route('contact')
         ->with('success', 'Votre message a été envoyé avec succès !');
 })->name('contact.send');
-

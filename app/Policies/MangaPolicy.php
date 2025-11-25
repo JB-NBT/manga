@@ -23,9 +23,9 @@ class MangaPolicy
     }
 
     /**
-     * Modérateur peut modifier n'importe quel manga
-     * Admin peut modifier n'importe quel manga
-     * User peut modifier uniquement ses propres mangas
+     * MODÉRATEUR peut modifier n'importe quel manga
+     * ADMIN ne peut PAS modifier (seulement supprimer)
+     * USER peut modifier uniquement ses propres mangas
      */
     public function update(User $user, Manga $manga): bool
     {
@@ -39,8 +39,9 @@ class MangaPolicy
     }
 
     /**
-     * SEUL l'admin peut supprimer n'importe quel manga
-     * User peut supprimer ses propres mangas
+     * ADMIN peut supprimer n'importe quel manga
+     * MODÉRATEUR ne peut PAS supprimer (seulement modifier)
+     * USER peut supprimer ses propres mangas
      */
     public function delete(User $user, Manga $manga): bool
     {
@@ -54,7 +55,8 @@ class MangaPolicy
     }
 
     /**
-     * Modérateur et Admin peuvent republier un manga expiré
+     * MODÉRATEUR peut republier un manga expiré
+     * ADMIN ne peut PAS republier (gestion de contenu = modérateur)
      */
     public function republish(User $user, Manga $manga): bool
     {
