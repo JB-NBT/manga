@@ -7,30 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
-/**
- * Class MangaController
- *
- * Gère la création, l'affichage, la modification et la suppression de mangas.
- *
- * @package App\Http\Controllers
- */
 class MangaController extends Controller
 {
-    /**
-     * Constructeur - protège les routes sauf index() et show().
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth')->except(['index', 'show']);
     }
 
-    /**
-     * Page d'accueil : liste uniquement les mangas publics.
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
     public function index()
     {
         $mangas = Manga::where('est_public', true)
@@ -41,12 +24,6 @@ class MangaController extends Controller
         return view('mangas.index', compact('mangas'));
     }
 
-    /**
-     * Affiche la collection de l'utilisateur.
-     * Admin : tous les mangas.
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
     public function myCollection()
     {
         $user = Auth::user();
@@ -54,6 +31,9 @@ class MangaController extends Controller
         if ($user->hasRole('admin')) {
             $mangas = Manga::with('user')->orderBy('created_at', 'desc')->paginate(12);
             $title = "Tous les mangas (Admin)";
+        } elseif ($user->hasRole('moderator')) {
+            $mangas = Manga::with('user')->orderBy('created_at', 'desc')->paginate(12);
+            $title = "Tous les mangas (Modérateur)";
         } else {
             $mangas = Manga::where('user_id', $user->id)
                 ->where('est_public', false)
@@ -65,23 +45,12 @@ class MangaController extends Controller
         return view('mangas.my-collection', compact('mangas', 'title'));
     }
 
-    /**
-     * Affiche le formulaire de création.
-     *
-     * @return \Illuminate\Contracts\View\View
-     */
     public function create()
     {
         $this->authorize('create', Manga::class);
         return view('mangas.create');
     }
 
-    /**
-     * Enregistre un nouveau manga privé.
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
         $this->authorize('create', Manga::class);
@@ -110,19 +79,13 @@ class MangaController extends Controller
             ->with('success', 'Manga ajouté à votre collection !');
     }
 
-    /**
-     * Affiche un manga, si l'utilisateur est autorisé.
-     *
-     * @param Manga $manga
-     * @return \Illuminate\Contracts\View\View
-     */
     public function show(Manga $manga)
     {
         if (!$manga->est_public) {
             if (!Auth::check()) {
                 abort(403, 'Accès non autorisé.');
             }
-            if (Auth::id() !== $manga->user_id && !Auth::user()->hasRole('admin')) {
+            if (Auth::id() !== $manga->user_id && !Auth::user()->hasAnyRole(['admin', 'moderator'])) {
                 abort(403, 'Ce manga est privé.');
             }
         }
@@ -132,12 +95,6 @@ class MangaController extends Controller
         return view('mangas.show', compact('manga'));
     }
 
-    /**
-     * Formulaire d'édition.
-     *
-     * @param Manga $manga
-     * @return \Illuminate\Contracts\View\View
-     */
     public function edit(Manga $manga)
     {
         $this->authorize('update', $manga);
@@ -145,13 +102,6 @@ class MangaController extends Controller
         return view('mangas.edit', compact('manga'));
     }
 
-    /**
-     * Met à jour un manga.
-     *
-     * @param Request $request
-     * @param Manga $manga
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, Manga $manga)
     {
         $this->authorize('update', $manga);
@@ -184,12 +134,6 @@ class MangaController extends Controller
             ->with('success', 'Manga mis à jour !');
     }
 
-    /**
-     * Supprime un manga.
-     *
-     * @param Manga $manga
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy(Manga $manga)
     {
         $this->authorize('delete', $manga);
@@ -203,5 +147,20 @@ class MangaController extends Controller
         return redirect()->route('mangas.my-collection')
             ->with('success', 'Manga supprimé !');
     }
-}
 
+    /**
+     * ✅ NOUVEAU : Republier un manga expiré (Modérateur/Admin)
+     */
+    public function republish(Manga $manga)
+    {
+        $this->authorize('republish', $manga);
+
+        if ($manga->est_public) {
+            return redirect()->back()->with('error', 'Ce manga est déjà public.');
+        }
+
+        $manga->republish();
+
+        return redirect()->back()->with('success', '✅ Manga republié avec succès !');
+    }
+}

@@ -12,7 +12,6 @@ class RolePermissionSeeder extends Seeder
 {
     public function run(): void
     {
-        // Réinitialiser les caches de permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // ========================================
@@ -35,10 +34,14 @@ class RolePermissionSeeder extends Seeder
             'edit own avis',
             'delete own avis',
             
+            // Permissions modérateur
+            'edit any manga',           // Modifier n'importe quel manga
+            'approve publications',      // Approuver les publications
+            'republish expired manga',   // Republier les mangas expirés
+            
             // Permissions admin
             'manage users',
-            'manage all mangas',
-            'approve publications',
+            'delete any manga',          // Supprimer n'importe quel manga
             'delete any avis',
             'view admin panel',
         ];
@@ -51,9 +54,44 @@ class RolePermissionSeeder extends Seeder
         // CRÉATION DES RÔLES
         // ========================================
 
-        // 🔴 RÔLE ADMIN (accès total)
+        // 🔴 RÔLE ADMIN (gestion complète)
         $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $adminRole->givePermissionTo(Permission::all()); // Toutes les permissions
+        $adminRole->givePermissionTo([
+            'view own mangas',
+            'create manga',
+            'edit own manga',
+            'delete own manga',
+            'view public library',
+            'request publication',
+            'create avis',
+            'edit own avis',
+            'delete own avis',
+            'edit any manga',
+            'approve publications',
+            'republish expired manga',
+            'manage users',
+            'delete any manga',
+            'delete any avis',
+            'view admin panel',
+        ]);
+
+        // 🟡 RÔLE MODÉRATEUR (gestion contenu)
+        $moderatorRole = Role::firstOrCreate(['name' => 'moderator']);
+        $moderatorRole->givePermissionTo([
+            'view own mangas',
+            'create manga',
+            'edit own manga',
+            'delete own manga',
+            'view public library',
+            'request publication',
+            'create avis',
+            'edit own avis',
+            'delete own avis',
+            'edit any manga',           // ✅ Modifier n'importe quel manga
+            'approve publications',      // ✅ Valider les publications
+            'republish expired manga',   // ✅ Republier les mangas expirés
+            'delete any avis',
+        ]);
 
         // 🟢 RÔLE USER (utilisateur enregistré)
         $userRole = Role::firstOrCreate(['name' => 'user']);
@@ -69,10 +107,6 @@ class RolePermissionSeeder extends Seeder
             'delete own avis',
         ]);
 
-        // 🔵 RÔLE VISITEUR (pas de compte, lecture seule)
-        // Note : Le rôle "visiteur" n'est pas assigné aux users
-        // C'est juste pour la logique métier (guest = visiteur)
-
         // ========================================
         // CRÉATION DES COMPTES DE TEST
         // ========================================
@@ -85,7 +119,17 @@ class RolePermissionSeeder extends Seeder
                 'password' => Hash::make('password123'),
             ]
         );
-        $admin->assignRole('admin');
+        $admin->syncRoles(['admin']);
+
+        // 🟡 Compte MODÉRATEUR
+        $moderator = User::firstOrCreate(
+            ['email' => 'moderator@manga.local'],
+            [
+                'name' => 'Modérateur',
+                'password' => Hash::make('password123'),
+            ]
+        );
+        $moderator->syncRoles(['moderator']);
 
         // 🟢 Compte USER 1
         $user1 = User::firstOrCreate(
@@ -95,7 +139,7 @@ class RolePermissionSeeder extends Seeder
                 'password' => Hash::make('password123'),
             ]
         );
-        $user1->assignRole('user');
+        $user1->syncRoles(['user']);
 
         // 🟢 Compte USER 2
         $user2 = User::firstOrCreate(
@@ -105,20 +149,25 @@ class RolePermissionSeeder extends Seeder
                 'password' => Hash::make('password123'),
             ]
         );
-        $user2->assignRole('user');
+        $user2->syncRoles(['user']);
 
         // ========================================
         // MESSAGES DE CONFIRMATION
         // ========================================
 
         echo "\n✅ Permissions créées : " . count($permissions);
-        echo "\n✅ Rôles créés : Admin, User";
+        echo "\n✅ Rôles créés : Admin, Modérateur, User";
         echo "\n\n📋 COMPTES DE TEST CRÉÉS :\n";
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
         echo "🔴 ADMIN:\n";
         echo "   Email    : admin@manga.local\n";
         echo "   Password : password123\n";
-        echo "   Accès    : Total (gestion complète)\n\n";
+        echo "   Accès    : Gestion complète + Suppression mangas\n\n";
+        
+        echo "🟡 MODÉRATEUR:\n";
+        echo "   Email    : moderator@manga.local\n";
+        echo "   Password : password123\n";
+        echo "   Accès    : Modification tous mangas + Validation publications + Republication\n\n";
         
         echo "🟢 USER 1:\n";
         echo "   Email    : user@manga.local\n";

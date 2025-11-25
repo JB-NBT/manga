@@ -36,12 +36,22 @@
                     {{-- Mes demandes de publication --}}
                     <li><a href="{{ route('publication.my-requests') }}" class="nav-link">Mes demandes</a></li>
 
-                    {{-- ADMIN - Séparateur visuel --}}
-                    @if(Auth::user()->hasRole('admin'))
+                    
+                    {{-- MODÉRATEUR & ADMIN - Séparateur visuel --}}
+                    @if(Auth::user()->hasAnyRole(['admin', 'moderator']))
                         <li class="nav-separator"></li>
                         <li>
-                            <a href="{{ route('admin.publication.index') }}" class="nav-link nav-link-admin" title="Panel Admin">
-                                <span class="admin-badge">👑 Admin</span>
+                            <a href="{{ route('admin.publication.index') }}" class="nav-link nav-link-admin" title="Panel Modération">
+                                @if(Auth::user()->hasRole('admin'))
+                                    <span class="admin-badge">👑 Admin</span>
+                                @else
+                                    <span class="moderator-badge">🛡️ Modérateur</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('admin.copyright.management') }}" class="nav-link nav-link-copyright" title="Gestion Copyright">
+                                <span>🛡️ Copyright</span>
                             </a>
                         </li>
                     @endif
