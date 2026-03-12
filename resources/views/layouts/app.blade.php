@@ -12,6 +12,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('home') }}" class="navbar-brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height:38px;margin-right:8px;vertical-align:middle;">
                 <span class="logo-text">Manga<span class="accent">Library</span></span>
             </a>
 
