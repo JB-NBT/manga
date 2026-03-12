@@ -1,0 +1,49 @@
+@startuml Diagramme_Activite_Ajout_Manga
+title Diagramme d'"'"'Activité - Ajout d'"'"'un Manga
+
+skinparam backgroundColor #FEFEFE
+skinparam activity {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+    DiamondBackgroundColor #FEF9E7
+    DiamondBorderColor #F39C12
+}
+
+start
+
+:L'"'"'utilisateur accède au formulaire\n"/mangas/create";
+
+:Remplir le formulaire\n(titre, auteur, description, statut...);
+
+:Soumettre le formulaire;
+
+:Validation des données;
+
+if (Données valides ?) then (non)
+    :Afficher les erreurs de validation;
+    stop
+else (oui)
+    :Vérifier si le titre est dans\nla liste des contenus interdits;
+
+    if (Titre interdit ?) then (oui)
+        :Afficher un message d'"'"'erreur\n"Ce contenu n'"'"'est pas autorisé";
+        stop
+    else (non)
+        if (Image de couverture fournie ?) then (oui)
+            :Sauvegarder l'"'"'image\ndans storage/app/public/covers;
+        else (non)
+        endif
+
+        :Créer le manga en base de données\n(statut: privé par défaut);
+
+        if (Nombre de tomes > 0 ?) then (oui)
+            :Générer les entrées de tomes\n(possede = false par défaut);
+        else (non)
+        endif
+
+        :Rediriger vers "/ma-collection"\navec message de succès;
+        stop
+    endif
+endif
+
+@enduml

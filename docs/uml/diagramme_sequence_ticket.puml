@@ -1,0 +1,64 @@
+@startuml Diagramme_Sequence_Ticket
+title Séquence - Gestion d'un Ticket de Support
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+
+actor "Utilisateur" as U
+actor "Modérateur" as M
+participant "TicketController" as TC
+participant "Ticket" as T
+database "Base de données" as DB
+
+== Création du ticket ==
+U -> TC : GET /tickets/create
+TC --> U : Formulaire de création
+
+U -> TC : POST /tickets\n(sujet, description, categorie, priorite)
+activate TC
+TC -> T : create(user_id, sujet, description,\ncategorie, priorite, statut="ouvert")
+activate T
+T -> DB : INSERT INTO tickets
+DB --> T : ticket créé
+T --> TC : Ticket
+deactivate T
+TC --> U : redirect("/tickets/{id}") + succès
+deactivate TC
+
+== Assignation et traitement ==
+M -> TC : GET /admin/tickets
+activate TC
+TC -> DB : SELECT tickets WHERE statut IN (ouvert, en_cours)
+DB --> TC : liste tickets
+TC --> M : Vue admin tickets
+deactivate TC
+
+M -> TC : POST /admin/tickets/{ticket}/assign
+activate TC
+TC -> T : update(assigned_to=moderateur_id, statut="en_cours")
+T -> DB : UPDATE tickets
+DB --> T : OK
+TC --> M : redirect + "Ticket assigné"
+deactivate TC
+
+M -> TC : POST /admin/tickets/{ticket}/respond
+activate TC
+TC -> T : update(reponse_moderateur, statut="resolu",\ndate_resolution=NOW())
+T -> DB : UPDATE tickets
+DB --> T : OK
+TC --> M : redirect + "Réponse envoyée"
+deactivate TC
+
+== Fermeture par l'utilisateur ==
+U -> TC : GET /tickets/{ticket}
+TC --> U : Vue du ticket avec réponse
+
+U -> TC : POST /tickets/{ticket}/close
+activate TC
+TC -> T : update(statut="ferme")
+T -> DB : UPDATE tickets
+DB --> T : OK
+TC --> U : redirect + "Ticket fermé"
+deactivate TC
+
+@enduml

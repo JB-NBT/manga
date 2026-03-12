@@ -1,0 +1,252 @@
+@startuml Diagramme_Classes_MangaLibrary
+title Diagramme de Classes - MangaLibrary
+
+skinparam classAttributeIconSize 0
+skinparam classFontSize 12
+skinparam packageStyle rectangle
+skinparam backgroundColor #FEFEFE
+skinparam class {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+    HeaderBackgroundColor #2980B9
+    HeaderFontColor #FFFFFF
+}
+
+' ===========================
+' MODÈLES PRINCIPAUX
+' ===========================
+
+class User {
+    + id : int
+    + name : string
+    + email : string
+    - password : string
+    + remember_token : string
+    + email_verified_at : datetime
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + mangas() : HasMany
+    + tickets() : HasMany
+    + avis() : HasMany
+    + hasRole(role) : bool
+    + hasPermissionTo(permission) : bool
+}
+
+class Manga {
+    + id : int
+    + user_id : int
+    + titre : string
+    + auteur : string
+    + description : string
+    + image_couverture : string
+    + nombre_tomes : int
+    + statut : enum
+    + note : int
+    + est_public : boolean
+    + note_moyenne : decimal
+    + nombre_avis : int
+    + date_derniere_republication : datetime
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + user() : BelongsTo
+    + tomes() : HasMany
+    + avis() : HasMany
+    + publicationRequest() : HasOne
+    + updateNoteMoyenne() : void
+    + isExpired() : bool
+    + unpublish() : void
+    + republish() : void
+    + scopeExpired(query) : Builder
+    + scopeExpiringSoon(query) : Builder
+}
+
+class Tome {
+    + id : int
+    + manga_id : int
+    + numero : int
+    + possede : boolean
+    + date_achat : date
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + manga() : BelongsTo
+}
+
+class Avis {
+    + id : int
+    + manga_id : int
+    + user_id : int
+    + note : int
+    + commentaire : string
+    + modere : boolean
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + manga() : BelongsTo
+    + user() : BelongsTo
+}
+
+class Ticket {
+    + id : int
+    + user_id : int
+    + assigned_to : int
+    + sujet : string
+    + description : string
+    + categorie : enum
+    + priorite : enum
+    + statut : enum
+    + reponse_moderateur : string
+    + date_resolution : datetime
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + user() : BelongsTo
+    + assignedTo() : BelongsTo
+    + scopeOuverts(query) : Builder
+    + scopeEnCours(query) : Builder
+    + scopeNonResolus(query) : Builder
+    + estOuvert() : bool
+    + estResolu() : bool
+}
+
+class PublicationRequest {
+    + id : int
+    + manga_id : int
+    + user_id : int
+    + statut : enum
+    + message_utilisateur : string
+    + message_admin : string
+    + date_demande : datetime
+    + date_traitement : datetime
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + manga() : BelongsTo
+    + user() : BelongsTo
+    + estEnAttente() : bool
+    + estApprouvee() : bool
+    + estRefusee() : bool
+}
+
+class MangaInterdit {
+    + id : int
+    + titre : string
+    + auteur : string
+    + categorie : enum
+    + raison : string
+    + ajoute_par : int
+    + date_interdiction : date
+    + created_at : datetime
+    + updated_at : datetime
+    --
+    + ajoutePar() : BelongsTo
+    + getCategorieLibelleAttribute() : string
+    + scopeRechercheTitre(query, titre) : Builder
+    + scopeCategorie(query, categorie) : Builder
+    + {static} estInterdit(titre) : bool
+    + {static} verifierInterdit(titre) : array
+}
+
+class Role {
+    + id : int
+    + name : string
+    + guard_name : string
+    --
+    + permissions() : BelongsToMany
+    + users() : BelongsToMany
+}
+
+class Permission {
+    + id : int
+    + name : string
+    + guard_name : string
+    --
+    + roles() : BelongsToMany
+}
+
+' ===========================
+' ÉNUMÉRATIONS
+' ===========================
+
+enum StatutManga {
+    en_cours
+    termine
+    abandonne
+}
+
+enum StatutTicket {
+    ouvert
+    en_cours
+    resolu
+    ferme
+}
+
+enum PrioriteTicket {
+    basse
+    normale
+    haute
+    urgente
+}
+
+enum CategorieTicket {
+    bug
+    contenu
+    compte
+    suggestion
+    autre
+}
+
+enum StatutPublication {
+    en_attente
+    approuve
+    refuse
+}
+
+enum CategorieInterdit {
+    hentai
+    gore
+    pedophile
+    incitation_haine
+    terrorisme
+    copyright
+    autre
+}
+
+' ===========================
+' RELATIONS
+' ===========================
+
+User "1" --> "0..*" Manga : possède
+User "1" --> "0..*" Ticket : crée
+User "1" --> "0..*" Avis : laisse
+User "0..1" --> "0..*" Ticket : est assigné à
+User "1" --> "0..*" MangaInterdit : ajoute
+User "0..*" --> "0..*" Role : a
+
+Manga "1" --> "0..*" Tome : contient
+Manga "1" --> "0..*" Avis : reçoit
+Manga "1" --> "0..1" PublicationRequest : fait l'objet de
+
+PublicationRequest --> "1" User : demandé par
+PublicationRequest --> "1" Manga : concerne
+
+Avis --> "1" User : rédigé par
+Avis --> "1" Manga : sur
+
+Ticket --> "1" User : créé par
+Ticket --> "0..1" User : assigné à
+
+MangaInterdit --> "1" User : ajouté par
+
+Role "0..*" --> "0..*" Permission : a
+
+Manga ..> StatutManga : utilise
+Ticket ..> StatutTicket : utilise
+Ticket ..> PrioriteTicket : utilise
+Ticket ..> CategorieTicket : utilise
+PublicationRequest ..> StatutPublication : utilise
+MangaInterdit ..> CategorieInterdit : utilise
+
+@enduml

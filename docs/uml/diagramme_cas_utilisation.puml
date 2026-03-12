@@ -1,0 +1,143 @@
+@startuml Diagramme_Cas_Utilisation_MangaLibrary
+title Diagramme de Cas d'Utilisation - MangaLibrary
+
+skinparam actorStyle awesome
+skinparam backgroundColor #FEFEFE
+skinparam usecase {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+skinparam actor {
+    BackgroundColor #FEF9E7
+    BorderColor #F39C12
+}
+
+left to right direction
+
+' ===========================
+' ACTEURS
+' ===========================
+actor "Visiteur" as V
+actor "Utilisateur" as U
+actor "Modérateur" as M
+actor "Administrateur" as A
+
+U --|> V
+M --|> U
+A --|> M
+
+' ===========================
+' SYSTÈME
+' ===========================
+rectangle "MangaLibrary" {
+
+    ' --- ACCÈS PUBLIC ---
+    package "Accès public" {
+        usecase "Consulter la bibliothèque publique" as UC1
+        usecase "Voir les détails d'un manga" as UC2
+        usecase "S'inscrire" as UC3
+        usecase "Se connecter" as UC4
+    }
+
+    ' --- COLLECTION PERSONNELLE ---
+    package "Gestion de collection (Utilisateur)" {
+        usecase "Gérer ma collection" as UC5
+        usecase "Ajouter un manga" as UC6
+        usecase "Modifier un manga" as UC7
+        usecase "Supprimer un manga" as UC8
+        usecase "Gérer les tomes" as UC9
+        usecase "Marquer un tome comme possédé" as UC10
+        usecase "Demander la publication d'un manga" as UC11
+        usecase "Consulter mes demandes de publication" as UC12
+    }
+
+    ' --- AVIS ---
+    package "Avis (Utilisateur)" {
+        usecase "Laisser un avis" as UC13
+        usecase "Modifier son avis" as UC14
+        usecase "Supprimer son avis" as UC15
+    }
+
+    ' --- TICKETS ---
+    package "Support (Utilisateur)" {
+        usecase "Créer un ticket de support" as UC16
+        usecase "Consulter ses tickets" as UC17
+        usecase "Fermer un ticket" as UC18
+    }
+
+    ' --- MODÉRATION ---
+    package "Modération" {
+        usecase "Gérer les demandes de publication" as UC19
+        usecase "Approuver une demande" as UC20
+        usecase "Refuser une demande" as UC21
+        usecase "Modérer les avis" as UC22
+        usecase "Gérer les tickets de support" as UC23
+        usecase "Assigner un ticket" as UC24
+        usecase "Répondre à un ticket" as UC25
+        usecase "Gérer les contenus expirés" as UC26
+        usecase "Republier un manga expiré" as UC27
+        usecase "Gérer la liste noire" as UC28
+        usecase "Ajouter un contenu interdit" as UC29
+        usecase "Supprimer un contenu interdit" as UC30
+    }
+
+    ' --- ADMINISTRATION ---
+    package "Administration" {
+        usecase "Gérer les utilisateurs" as UC31
+        usecase "Voir le profil d'un utilisateur" as UC32
+        usecase "Modifier le rôle d'un utilisateur" as UC33
+        usecase "Supprimer un utilisateur" as UC34
+    }
+}
+
+' ===========================
+' ASSOCIATIONS VISITEUR
+' ===========================
+V --> UC1
+V --> UC2
+V --> UC3
+V --> UC4
+
+' ===========================
+' ASSOCIATIONS UTILISATEUR
+' ===========================
+U --> UC5
+UC5 ..> UC6 : <<include>>
+UC5 ..> UC7 : <<include>>
+UC5 ..> UC8 : <<include>>
+U --> UC9
+UC9 ..> UC10 : <<include>>
+U --> UC11
+U --> UC12
+U --> UC13
+U --> UC14
+U --> UC15
+U --> UC16
+U --> UC17
+U --> UC18
+
+' ===========================
+' ASSOCIATIONS MODÉRATEUR
+' ===========================
+M --> UC19
+UC19 ..> UC20 : <<include>>
+UC19 ..> UC21 : <<include>>
+M --> UC22
+M --> UC23
+UC23 ..> UC24 : <<include>>
+UC23 ..> UC25 : <<include>>
+M --> UC26
+UC26 ..> UC27 : <<include>>
+M --> UC28
+UC28 ..> UC29 : <<include>>
+UC28 ..> UC30 : <<include>>
+
+' ===========================
+' ASSOCIATIONS ADMINISTRATEUR
+' ===========================
+A --> UC31
+UC31 ..> UC32 : <<include>>
+UC31 ..> UC33 : <<include>>
+UC31 ..> UC34 : <<include>>
+
+@enduml

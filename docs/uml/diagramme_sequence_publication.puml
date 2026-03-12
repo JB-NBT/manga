@@ -1,0 +1,69 @@
+@startuml Diagramme_Sequence_Publication
+title Séquence - Demande de Publication d'un Manga
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+skinparam participant {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+
+actor "Utilisateur" as U
+actor "Modérateur" as M
+participant "PublicationRequestController" as PRC
+participant "MangaInterdit" as MI
+participant "PublicationRequest" as PR
+participant "Manga" as Manga
+database "Base de données" as DB
+
+== Vérification du titre ==
+U -> PRC : POST /mangas/{manga}/demande-publication
+activate PRC
+PRC -> MI : verifierInterdit(titre)
+activate MI
+MI -> DB : SELECT * FROM mangas_interdits WHERE titre LIKE ?
+DB --> MI : résultat
+MI --> PRC : null (non interdit)
+deactivate MI
+
+== Création de la demande ==
+PRC -> PR : create(manga_id, user_id, statut="en_attente", message)
+activate PR
+PR -> DB : INSERT INTO publication_requests
+DB --> PR : demande créée
+PR --> PRC : PublicationRequest
+deactivate PR
+PRC --> U : redirect("/mes-demandes") + succès
+deactivate PRC
+
+== Traitement par le modérateur ==
+M -> PRC : GET /admin/demandes-publication
+activate PRC
+PRC -> DB : SELECT demandes WHERE statut = "en_attente"
+DB --> PRC : liste des demandes
+PRC --> M : vue des demandes
+deactivate PRC
+
+alt Approbation
+    M -> PRC : POST /admin/demandes-publication/{id}/approve
+    activate PRC
+    PRC -> PR : update(statut="approuve", date_traitement)
+    PRC -> Manga : update(est_public=true, date_derniere_republication)
+    activate Manga
+    Manga -> DB : UPDATE mangas SET est_public=1
+    DB --> Manga : OK
+    Manga --> PRC : OK
+    deactivate Manga
+    PRC --> M : redirect + "Manga approuvé"
+    deactivate PRC
+else Refus
+    M -> PRC : POST /admin/demandes-publication/{id}/reject
+    activate PRC
+    PRC -> PR : update(statut="refuse", message_admin)
+    PR -> DB : UPDATE publication_requests
+    DB --> PR : OK
+    PRC --> M : redirect + "Demande refusée"
+    deactivate PRC
+end
+
+@enduml

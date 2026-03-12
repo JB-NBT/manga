@@ -1,0 +1,68 @@
+@startuml Diagramme_Deploiement
+title Diagramme de Déploiement - MangaLibrary
+
+skinparam backgroundColor #FEFEFE
+skinparam node {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+skinparam component {
+    BackgroundColor #FEF9E7
+    BorderColor #F39C12
+}
+
+node "Serveur Web (Ubuntu)" {
+    component "Apache2 / Nginx" as WEB
+    component "PHP 8.2-FPM" as PHP
+
+    node "Application Laravel" {
+        component "Routeur Laravel" as ROUTER
+        component "Contrôleurs HTTP" as CTRL
+        component "Modèles Eloquent" as MODELS
+        component "Vues Blade" as VIEWS
+        component "Middlewares\n(auth, permission)" as MW
+    }
+
+    node "Stockage fichiers" {
+        component "storage/app/public\n(images couvertures)" as STORAGE
+    }
+}
+
+node "Serveur de Base de Données" {
+    database "MySQL / MariaDB" {
+        component "Table: users" as T1
+        component "Table: mangas" as T2
+        component "Table: tomes" as T3
+        component "Table: avis" as T4
+        component "Table: tickets" as T5
+        component "Table: publication_requests" as T6
+        component "Table: mangas_interdits" as T7
+        component "Tables: roles/permissions\n(Spatie)" as T8
+    }
+}
+
+node "Client (Navigateur Web)" {
+    component "Interface Blade\n+ Bootstrap/CSS" as UI
+    component "JavaScript\n(Vite/Alpine.js)" as JS
+}
+
+UI --> WEB : HTTPS (port 443)
+JS --> WEB : AJAX (API checks)
+WEB --> PHP : FastCGI
+PHP --> ROUTER
+ROUTER --> MW
+MW --> CTRL
+CTRL --> MODELS
+MODELS --> T1
+MODELS --> T2
+MODELS --> T3
+MODELS --> T4
+MODELS --> T5
+MODELS --> T6
+MODELS --> T7
+MODELS --> T8
+CTRL --> VIEWS
+VIEWS --> WEB
+WEB --> STORAGE : Lecture fichiers
+
+@enduml
