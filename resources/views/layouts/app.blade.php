@@ -134,6 +134,10 @@
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
                         </a>
+                        <a href="/docs" target="_blank" class="footer-admin-btn">
+                            <span class="admin-icon">📖</span>
+                            <span>phpDocumentor</span>
+                        </a>
                     </div>
                 </div>
                 @endif
