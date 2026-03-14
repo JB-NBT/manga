@@ -17,6 +17,7 @@ use App\Models\Manga;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 
 /**
  * Contrôleur AvisController - Gestion des avis
@@ -38,6 +39,27 @@ class AvisController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+    }
+
+    /**
+     * Liste tous les avis en attente de modération.
+     *
+     * Accessible uniquement aux modérateurs.
+     *
+     * @return View
+     */
+    public function index(): View
+    {
+        if (!Auth::user()->hasPermissionTo('moderate avis')) {
+            abort(403, 'Action non autorisée.');
+        }
+
+        $avis = Avis::with(['manga', 'user'])
+            ->where('modere', false)
+            ->latest()
+            ->paginate(15);
+
+        return view('admin.avis.index', compact('avis'));
     }
 
     /**

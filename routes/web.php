@@ -56,6 +56,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/avis/{avis}', [AvisController::class, 'destroy'])->name('avis.destroy');
 
     // Modération des avis (Modérateur)
+    Route::get('/admin/avis', [AvisController::class, 'index'])
+        ->name('admin.avis.index')
+        ->middleware('permission:moderate avis');
+
     Route::post('/avis/{avis}/moderate', [AvisController::class, 'moderate'])
         ->name('avis.moderate')
         ->middleware('permission:moderate avis');
