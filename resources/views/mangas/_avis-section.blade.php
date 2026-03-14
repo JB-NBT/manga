@@ -98,6 +98,55 @@
         </div>
     @endauth
 
+    <!-- Avis en attente (visibles uniquement par les modérateurs) -->
+    @can('moderate avis')
+        @php $avisPending = $manga->avis->where('modere', false); @endphp
+        @if($avisPending->count() > 0)
+            <h3 style="color: #60a5fa; margin-top: 2rem; margin-bottom: 1rem;">
+                ⏳ Avis en attente de modération
+                <span style="font-size: 0.8rem; color: var(--text-secondary);">({{ $avisPending->count() }})</span>
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                @foreach($avisPending->sortByDesc('created_at') as $avis)
+                    <div style="background-color: var(--bg-card); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #60a5fa; opacity: 0.85;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                            <div>
+                                <strong style="color: var(--text-primary);">{{ $avis->user->name }}</strong>
+                                <span style="color: var(--text-secondary); font-size: 0.85rem; margin-left: 0.5rem;">
+                                    {{ $avis->created_at->diffForHumans() }}
+                                </span>
+                            </div>
+                            <div style="color: var(--warning);">
+                                @for($i = 1; $i <= 10; $i++)
+                                    @if($i <= $avis->note) ⭐ @endif
+                                @endfor
+                                <span style="color: var(--text-secondary);">{{ $avis->note }}/10</span>
+                            </div>
+                        </div>
+                        @if($avis->commentaire)
+                            <p style="color: var(--text-secondary); line-height: 1.6; margin-bottom: 1rem;">{{ $avis->commentaire }}</p>
+                        @endif
+                        <div style="display: flex; gap: 0.75rem;">
+                            <form action="{{ route('avis.moderate', $avis) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn-primary" style="font-size: 0.85rem; padding: 0.4rem 1rem; background-color: var(--success);">
+                                    ✅ Approuver
+                                </button>
+                            </form>
+                            <form action="{{ route('avis.destroy', $avis) }}" method="POST" onsubmit="return confirm('Supprimer cet avis ?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn-danger" style="font-size: 0.85rem; padding: 0.4rem 1rem;">
+                                    🗑️ Supprimer
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
+    @endcan
+
     <!-- Liste des avis modérés -->
     @if($manga->avis->where('modere', true)->count() > 0)
         <h3 style="color: var(--text-primary); margin-top: 2rem; margin-bottom: 1rem;">Avis de la communauté</h3>
@@ -113,9 +162,7 @@
                         </div>
                         <div style="color: var(--warning);">
                             @for($i = 1; $i <= 10; $i++)
-                                @if($i <= $avis->note)
-                                    ⭐
-                                @endif
+                                @if($i <= $avis->note) ⭐ @endif
                             @endfor
                             <span style="color: var(--text-secondary);">{{ $avis->note }}/10</span>
                         </div>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Demandes de publication - Admin')
+@section('title', 'Demandes de publication - Modérateur')
 
 @section('content')
 <div style="max-width: 1200px; margin: 0 auto;">

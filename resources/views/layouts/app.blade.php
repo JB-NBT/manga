@@ -12,7 +12,6 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('home') }}" class="navbar-brand">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height:50px;margin-right:4px;vertical-align:middle;">
                 <span class="logo-text">Manga<span class="accent">Library</span></span>
             </a>
 
@@ -59,7 +58,14 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     @can('approve publications')
-                                        <a href="{{ route('admin.publication.index') }}" class="dropdown-item">Demandes</a>
+                                        <a href="{{ route('admin.publication.index') }}" class="dropdown-item" style="border-left: 3px solid var(--warning); padding-left: 0.75rem;">
+                                            📋 Demandes publication
+                                        </a>
+                                    @endcan
+                                    @can('moderate avis')
+                                        <a href="{{ route('admin.avis.index') }}" class="dropdown-item" style="border-left: 3px solid #60a5fa; padding-left: 0.75rem;">
+                                            ⭐ Avis à modérer
+                                        </a>
                                     @endcan
                                     <a href="{{ route('admin.tickets.index') }}" class="dropdown-item">Tickets</a>
                                     <a href="{{ route('admin.mangas-interdits.index') }}" class="dropdown-item">Interdits</a>
@@ -133,10 +139,6 @@
                         <a href="http://glpi.local" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
-                        </a>
-                        <a href="/docs" target="_blank" class="footer-admin-btn">
-                            <span class="admin-icon">📖</span>
-                            <span>phpDocumentor</span>
                         </a>
                     </div>
                 </div>
