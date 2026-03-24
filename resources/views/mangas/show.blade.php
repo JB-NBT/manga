@@ -131,6 +131,76 @@
             </div>
         </div>
 
+        {{-- Section preview (si manga public) --}}
+        @if($manga->est_public)
+            @php $previews = $manga->previews; @endphp
+
+            {{-- Bouton preview pour les utilisateurs connectés --}}
+            @auth
+                @if($previews->count() > 0)
+                    <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--bg-card); border-radius: 10px; border-top: 1px solid var(--border);">
+                        <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Aperçu du manga</h3>
+                        <button onclick="document.getElementById('previewModal-{{ $manga->id }}').style.display='flex'" class="btn-primary" style="background-color: var(--accent-light);">
+                            Voir l'aperçu ({{ $previews->count() }} page{{ $previews->count() > 1 ? 's' : '' }})
+                        </button>
+                    </div>
+
+                    {{-- Modal preview --}}
+                    <div id="previewModal-{{ $manga->id }}" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)this.style.display='none'">
+                        <div style="background:var(--bg-card); border-radius:12px; padding:2rem; max-width:900px; width:95%; max-height:90vh; overflow-y:auto; position:relative;">
+                            <button onclick="document.getElementById('previewModal-{{ $manga->id }}').style.display='none'" style="position:absolute; top:1rem; right:1rem; background:var(--accent); color:#fff; border:none; border-radius:50%; width:2rem; height:2rem; cursor:pointer; font-size:1rem; line-height:1;">✕</button>
+                            <h2 style="color:var(--accent); margin-bottom:1.5rem;">Aperçu — {{ $manga->titre }}</h2>
+                            <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center;">
+                                @foreach($previews as $preview)
+                                    <div style="text-align:center;">
+                                        <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Page {{ $preview->ordre }}</p>
+                                        <img src="{{ asset('storage/' . $preview->image_path) }}" alt="Preview page {{ $preview->ordre }}" style="max-width:380px; width:100%; border-radius:8px; border:2px solid var(--border);">
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                @else
+                    <div style="margin-top: 2rem; padding: 1rem; background-color: var(--bg-hover); border-radius: 8px; color: var(--text-secondary); font-size:0.9rem;">
+                        Aucun aperçu disponible pour ce manga.
+                    </div>
+                @endif
+            @endauth
+
+            {{-- Gestion des previews (Admin/Modérateur) --}}
+            @can('uploadPreview', $manga)
+                <div style="margin-top: 2rem; padding: 1.5rem; background-color: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--warning);">
+                    <h3 style="color: var(--text-primary); margin-bottom: 1.5rem;">Gestion des images de preview</h3>
+
+                    @foreach([1, 2] as $ordre)
+                        @php $preview = $previews->firstWhere('ordre', $ordre); @endphp
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background-color: var(--bg-hover); border-radius: 8px;">
+                            <p style="color: var(--text-primary); font-weight: bold; margin-bottom: 0.75rem;">Page {{ $ordre }}</p>
+                            @if($preview)
+                                <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                                    <img src="{{ asset('storage/' . $preview->image_path) }}" alt="Preview {{ $ordre }}" style="height:100px; border-radius:6px; border:1px solid var(--border);">
+                                    <form action="{{ route('mangas.preview.delete', [$manga, $preview]) }}" method="POST" onsubmit="return confirm('Supprimer cette image de preview ?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn-primary" style="background-color: var(--accent);">Supprimer</button>
+                                    </form>
+                                </div>
+                            @else
+                                <form action="{{ route('mangas.preview.upload', $manga) }}" method="POST" enctype="multipart/form-data">
+                                    @csrf
+                                    <input type="hidden" name="ordre" value="{{ $ordre }}">
+                                    <div style="display:flex; align-items:center; gap:1rem; flex-wrap:wrap;">
+                                        <input type="file" name="image" accept="image/*" required class="form-control" style="max-width:300px;">
+                                        <button type="submit" class="btn-primary" style="background-color: var(--success);">Uploader page {{ $ordre }}</button>
+                                    </div>
+                                </form>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            @endcan
+        @endif
+
         {{-- Section avis (si manga public) --}}
         @if($manga->est_public)
             @include('mangas._avis-section')

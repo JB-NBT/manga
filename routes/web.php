@@ -49,6 +49,14 @@ Route::middleware(['auth'])->group(function () {
         ->middleware('permission:republish expired manga');
 
     // ========================================
+    // PREVIEW MANGA (Admin/Modérateur uniquement)
+    // ========================================
+    Route::post('/mangas/{manga}/preview', [MangaController::class, 'uploadPreview'])
+        ->name('mangas.preview.upload');
+    Route::delete('/mangas/{manga}/preview/{preview}', [MangaController::class, 'deletePreview'])
+        ->name('mangas.preview.delete');
+
+    // ========================================
     // ROUTES AVIS
     // ========================================
     Route::post('/mangas/{manga}/avis', [AvisController::class, 'store'])->name('avis.store');

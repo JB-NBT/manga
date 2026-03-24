@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Manga;
+use App\Models\MangaPreview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -16,7 +17,7 @@ class MangaController extends Controller
 
     public function index(Request $request)
     {
-        $query = Manga::where('est_public', true)->with('user');
+        $query = Manga::where('est_public', true)->with(['user', 'previews']);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
@@ -96,7 +97,7 @@ class MangaController extends Controller
             }
         }
 
-        $manga->load('user', 'avis.user');
+        $manga->load('user', 'avis.user', 'previews');
 
         return view('mangas.show', compact('manga'));
     }
@@ -151,6 +152,48 @@ class MangaController extends Controller
 
         return redirect()->route('mangas.my-collection')
             ->with('success', 'Manga supprimé !');
+    }
+
+    /**
+     * Upload d'une image de preview (admin/modérateur uniquement)
+     */
+    public function uploadPreview(Request $request, Manga $manga)
+    {
+        $this->authorize('uploadPreview', $manga);
+
+        $validated = $request->validate([
+            'ordre' => 'required|integer|in:1,2',
+            'image' => 'required|file|mimes:jpeg,jpg,png,gif,webp|max:5120',
+        ]);
+
+        $existingPreview = $manga->previews()->where('ordre', $validated['ordre'])->first();
+        if ($existingPreview) {
+            Storage::disk('public')->delete($existingPreview->image_path);
+            $existingPreview->delete();
+        }
+
+        $path = $request->file('image')->store('previews', 'public');
+
+        MangaPreview::create([
+            'manga_id' => $manga->id,
+            'ordre' => $validated['ordre'],
+            'image_path' => $path,
+        ]);
+
+        return redirect()->back()->with('success', 'Image de preview page ' . $validated['ordre'] . ' uploadée !');
+    }
+
+    /**
+     * Suppression d'une image de preview (admin/modérateur uniquement)
+     */
+    public function deletePreview(Manga $manga, MangaPreview $preview)
+    {
+        $this->authorize('uploadPreview', $manga);
+
+        Storage::disk('public')->delete($preview->image_path);
+        $preview->delete();
+
+        return redirect()->back()->with('success', 'Image de preview supprimée.');
     }
 
     /**

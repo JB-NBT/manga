@@ -117,6 +117,16 @@ class Manga extends Model
     }
 
     /**
+     * Récupère les images de prévisualisation du manga (max 2).
+     *
+     * @return HasMany<MangaPreview>
+     */
+    public function previews(): HasMany
+    {
+        return $this->hasMany(MangaPreview::class)->orderBy('ordre');
+    }
+
+    /**
      * Récupère tous les avis du manga.
      *
      * @return HasMany<Avis>

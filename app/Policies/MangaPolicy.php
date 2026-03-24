@@ -62,4 +62,12 @@ class MangaPolicy
     {
         return $user->hasPermissionTo('republish expired manga');
     }
+
+    /**
+     * Seuls admin et modérateur peuvent ajouter/supprimer les images de preview
+     */
+    public function uploadPreview(User $user, Manga $manga): bool
+    {
+        return $user->hasAnyRole(['admin', 'moderator']);
+    }
 }
