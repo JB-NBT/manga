@@ -12,6 +12,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('home') }}" class="navbar-brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 40px;">
                 <span class="logo-text">Manga<span class="accent">Library</span></span>
             </a>
 
@@ -136,7 +137,7 @@
                             <span class="admin-icon">🗄️</span>
                             <span>phpMyAdmin</span>
                         </a>
-                        <a href="http://glpi.local" target="_blank" class="footer-admin-btn">
+                        <a href="http://192.168.30.10:8080" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
                         </a>
