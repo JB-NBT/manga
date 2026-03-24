@@ -64,7 +64,7 @@
                                     @foreach($manga->previews as $preview)
                                         <div style="text-align:center;">
                                             <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Page {{ $preview->ordre }}</p>
-                                            <img src="{{ asset('storage/' . $preview->image_path) }}" alt="Preview page {{ $preview->ordre }}" style="max-width:380px; width:100%; border-radius:8px; border:2px solid var(--border);">
+                                            <img src="{{ asset('storage/' . $preview->image_path) }}" alt="Preview page {{ $preview->ordre }}" class="preview-img" style="max-width:380px; width:100%; border-radius:8px; border:2px solid var(--border); cursor:zoom-in;">
                                         </div>
                                     @endforeach
                                 </div>
@@ -95,6 +95,26 @@
             @endif
         </div>
     @endif
+
+{{-- Lightbox fullscreen (partagé) --}}
+@auth
+<div id="lightbox" onclick="this.style.display='none'" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:99999; justify-content:center; align-items:center; cursor:zoom-out;">
+    <img id="lightbox-img" src="" alt="" style="max-width:95vw; max-height:95vh; border-radius:6px; object-fit:contain;">
+    <button onclick="document.getElementById('lightbox').style.display='none'" style="position:fixed; top:1rem; right:1rem; background:rgba(255,255,255,0.15); color:#fff; border:none; border-radius:50%; width:2.5rem; height:2.5rem; cursor:pointer; font-size:1.2rem; line-height:1;">✕</button>
+</div>
+<script>
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('preview-img')) {
+        e.stopPropagation();
+        document.getElementById('lightbox-img').src = e.target.src;
+        document.getElementById('lightbox').style.display = 'flex';
+    }
+});
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') document.getElementById('lightbox').style.display = 'none';
+});
+</script>
+@endauth
 
 <style>
 .page-header {

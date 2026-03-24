@@ -64,7 +64,7 @@ class PublicationRequestController extends Controller
 
         $requests = PublicationRequest::with(['manga', 'user'])
             ->where('statut', 'en_attente')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->paginate(20);
 
         return view('admin.publication-requests.index', compact('requests'));
