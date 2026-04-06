@@ -136,7 +136,7 @@
                             <span class="admin-icon">🗄️</span>
                             <span>phpMyAdmin</span>
                         </a>
-                        <a href="http://192.168.30.10:8080" target="_blank" class="footer-admin-btn">
+                        <a href="http://192.168.56.111:8080" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
                         </a>
