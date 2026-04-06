@@ -152,7 +152,7 @@ class TomeController extends Controller
 
         $validated = $request->validate([
             'possede' => 'required|boolean',
-            'date_achat' => 'nullable|date',
+            'date_achat' => 'nullable|date|before_or_equal:today',
         ]);
 
         $tome->update($validated);

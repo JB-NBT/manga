@@ -66,6 +66,7 @@ class RolePermissionSeeder extends Seeder
             'edit own avis',
             'delete own avis',
             'moderate avis',
+            'approve publications',      // ✅ ADMIN : Peut valider ses propres demandes
             'manage users',
             'delete any manga',          // ✅ ADMIN : Suppression uniquement
             'view admin panel',
