@@ -41,20 +41,26 @@ else
     warning ".env déjà existant, on le conserve."
 fi
 
-# Saisie des paramètres base de données
+# Saisie des paramètres
 echo ""
-echo "--- Configuration de la base de données ---"
+echo "--- Configuration ---"
 read -p "Nom de la base de données [manga_library] : " DB_NAME
 DB_NAME=${DB_NAME:-manga_library}
 
-read -p "Utilisateur MySQL [root] : " DB_USER
-DB_USER=${DB_USER:-root}
-
-read -s -p "Mot de passe MySQL : " DB_PASS
-echo ""
-
 read -p "URL de l'application [http://localhost] : " APP_URL
 APP_URL=${APP_URL:-http://localhost}
+
+# Création du user MySQL dédié via sudo mysql (socket auth)
+DB_USER="manga_user"
+DB_PASS="MangaLibrary2024!"
+
+info "Création de la base de données et de l'utilisateur MySQL..."
+sudo mysql <<EOF
+CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS '${DB_USER}'@'localhost' IDENTIFIED BY '${DB_PASS}';
+GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost';
+FLUSH PRIVILEGES;
+EOF
 
 # Mise à jour du .env
 sed -i "s|DB_DATABASE=.*|DB_DATABASE=${DB_NAME}|" .env
@@ -62,7 +68,7 @@ sed -i "s|DB_USERNAME=.*|DB_USERNAME=${DB_USER}|" .env
 sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=${DB_PASS}|" .env
 sed -i "s|APP_URL=.*|APP_URL=${APP_URL}|" .env
 
-info "Fichier .env configuré."
+info "Fichier .env configuré (user MySQL : ${DB_USER})"
 
 # Installation des dépendances PHP
 info "Installation des dépendances PHP (Composer)..."
@@ -78,14 +84,6 @@ npm install
 
 info "Compilation des assets (Vite)..."
 npm run build
-
-# Création de la base de données si elle n'existe pas
-info "Création de la base de données si nécessaire..."
-if [ -z "${DB_PASS}" ] && [ "${DB_USER}" = "root" ]; then
-    sudo mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null || warning "Impossible de créer la base automatiquement, vérifiez qu'elle existe."
-else
-    mysql -u"${DB_USER}" -p"${DB_PASS}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || warning "Impossible de créer la base automatiquement, vérifiez qu'elle existe."
-fi
 
 # Migrations et seeders
 info "Exécution des migrations..."
