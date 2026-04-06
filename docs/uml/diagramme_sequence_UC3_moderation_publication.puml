@@ -1,0 +1,77 @@
+@startuml Diagramme_Sequence_UC3_Moderation_Publication
+title UC3 : Modérer les demandes de publication
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+skinparam participant {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+
+actor "Modérateur" as M
+participant "Vue (Blade)" as V
+participant "PublicationRequestController" as PRC
+participant "PublicationRequest" as PR
+participant "Manga" as Manga
+database "Base de données" as DB
+
+== Consultation des demandes ==
+M -> V : GET /admin/demandes-publication
+V -> PRC : index()
+activate PRC
+PRC -> DB : SELECT publication_requests\nWHERE statut="en_attente"\nORDER BY created_at ASC
+DB --> PRC : liste des demandes
+PRC --> V : vue admin avec liste triée par ancienneté
+deactivate PRC
+V --> M : Tableau des demandes en attente
+
+== Vérification anti auto-modération ==
+note over PRC : Le modérateur ne peut pas\ntraiter ses propres demandes\n(user_id === Auth::id())
+
+alt Approbation
+    M -> V : Clique "Approuver"
+    V -> PRC : POST /admin/demandes-publication/{id}/approve
+    activate PRC
+    PRC -> DB : SELECT * FROM publication_requests WHERE id=?
+    DB --> PRC : PublicationRequest
+    PRC -> PRC : Vérifie user_id !== Auth::id()
+    PRC -> PR : update(statut="approuve",\ndate_traitement=now(),\nmoderator_id=Auth::id())
+    activate PR
+    PR -> DB : UPDATE publication_requests
+    DB --> PR : OK
+    deactivate PR
+    PRC -> Manga : update(est_public=true)
+    activate Manga
+    Manga -> DB : UPDATE mangas SET est_public=1
+    DB --> Manga : OK
+    deactivate Manga
+    PRC --> V : redirect + "Manga approuvé et publié"
+    deactivate PRC
+    V --> M : Confirmation approbation
+
+else Refus
+    M -> V : Clique "Refuser" + saisit un motif
+    V -> PRC : POST /admin/demandes-publication/{id}/reject
+    activate PRC
+    PRC -> DB : SELECT * FROM publication_requests WHERE id=?
+    DB --> PRC : PublicationRequest
+    PRC -> PRC : Vérifie user_id !== Auth::id()
+    PRC -> PR : update(statut="refuse",\ndate_traitement=now(),\nmessage_admin=motif)
+    activate PR
+    PR -> DB : UPDATE publication_requests
+    DB --> PR : OK
+    deactivate PR
+    PRC --> V : redirect + "Demande refusée"
+    deactivate PRC
+    V --> M : Confirmation refus
+end
+
+== Auto-refus après 30 jours (tâche planifiée) ==
+participant "RejectExpiredPublicationRequests" as CMD
+CMD -> DB : SELECT * FROM publication_requests\nWHERE statut="en_attente"\nAND created_at < NOW() - 30 jours
+DB --> CMD : demandes expirées
+CMD -> PR : update(statut="refuse",\nmessage_admin="Refus automatique après 30 jours")
+PR -> DB : UPDATE publication_requests
+DB --> PR : OK
+
+@enduml

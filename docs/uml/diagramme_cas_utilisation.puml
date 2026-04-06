@@ -74,8 +74,6 @@ rectangle "MangaLibrary" {
         usecase "Gérer les tickets de support" as UC23
         usecase "Assigner un ticket" as UC24
         usecase "Répondre à un ticket" as UC25
-        usecase "Gérer les contenus expirés" as UC26
-        usecase "Republier un manga expiré" as UC27
         usecase "Gérer la liste noire" as UC28
         usecase "Ajouter un contenu interdit" as UC29
         usecase "Supprimer un contenu interdit" as UC30
@@ -126,8 +124,6 @@ M --> UC22
 M --> UC23
 UC23 ..> UC24 : <<include>>
 UC23 ..> UC25 : <<include>>
-M --> UC26
-UC26 ..> UC27 : <<include>>
 M --> UC28
 UC28 ..> UC29 : <<include>>
 UC28 ..> UC30 : <<include>>
