@@ -124,22 +124,33 @@ class MangaInterditController extends Controller
     }
 
     /**
-     * Détecte les mangas existants qui correspondent à des titres interdits
+     * Détecte les mangas existants qui correspondent à des titres interdits.
+     * Utilise une seule requête groupée au lieu d'une requête par interdit.
      */
     private function detecterInfractions(): array
     {
         $infractions = [];
         $interdits = MangaInterdit::all();
 
-        foreach ($interdits as $interdit) {
-            $mangasTrouves = Manga::where('titre', 'LIKE', '%' . $interdit->titre . '%')->get();
+        if ($interdits->isEmpty()) {
+            return [];
+        }
 
-            foreach ($mangasTrouves as $manga) {
-                $infractions[] = [
-                    'manga' => $manga,
-                    'interdit' => $interdit,
-                    'proprietaire' => $manga->user,
-                ];
+        $query = Manga::with('user');
+        foreach ($interdits as $interdit) {
+            $query->orWhere('titre', 'LIKE', '%' . $interdit->titre . '%');
+        }
+        $mangasTrouves = $query->get();
+
+        foreach ($mangasTrouves as $manga) {
+            foreach ($interdits as $interdit) {
+                if (stripos($manga->titre, $interdit->titre) !== false) {
+                    $infractions[] = [
+                        'manga' => $manga,
+                        'interdit' => $interdit,
+                        'proprietaire' => $manga->user,
+                    ];
+                }
             }
         }
 

@@ -2,9 +2,9 @@
 @section('title', 'Accueil - MangaLibrary')
 @section('content')
     <div class="page-header">
-        <h1>Bibliotheque</h1>
+        <h1>Bibliothèque</h1>
         @if(request('search'))
-            <p class="search-info">Resultats pour "{{ request('search') }}" ({{ $mangas->total() }} manga(s))</p>
+            <p class="search-info">Résultats pour "{{ request('search') }}" ({{ $mangas->total() }} manga(s))</p>
         @endif
     </div>
 
@@ -19,8 +19,8 @@
                             @endif
                             <span class="manga-status-badge badge-{{ $manga->statut }}">
                                 @if($manga->statut == 'en_cours') En cours
-                                @elseif($manga->statut == 'termine') Termine
-                                @else Abandonne
+                                @elseif($manga->statut == 'termine') Terminé
+                                @else Abandonné
                                 @endif
                             </span>
                             @if($manga->nombre_avis > 0)
@@ -81,12 +81,12 @@
     @else
         <div class="empty-state">
             <div class="empty-icon">M</div>
-            <h2>Aucun manga trouve</h2>
+            <h2>Aucun manga trouvé</h2>
             @if(request('search'))
-                <p>Aucun resultat pour "{{ request('search') }}"</p>
+                <p>Aucun résultat pour "{{ request('search') }}"</p>
                 <a href="{{ route('home') }}" class="btn-primary">Voir tous les mangas</a>
             @else
-                <p>La bibliotheque est vide pour le moment.</p>
+                <p>La bibliothèque est vide pour le moment.</p>
                 @auth
                     @can('create manga')
                         <a href="{{ route('mangas.create') }}" class="btn-primary">Ajouter un manga</a>

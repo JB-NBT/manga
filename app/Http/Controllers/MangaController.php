@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Gère l'affichage et la gestion des mangas (collection privée et bibliothèque publique).
+ */
 class MangaController extends Controller
 {
     public function __construct()
@@ -15,6 +18,9 @@ class MangaController extends Controller
         $this->middleware('auth')->except(['index', 'show']);
     }
 
+    /**
+     * Affiche la bibliothèque publique avec recherche optionnelle par titre ou auteur.
+     */
     public function index(Request $request)
     {
         $query = Manga::where('est_public', true)->with(['user', 'previews']);
@@ -32,6 +38,10 @@ class MangaController extends Controller
         return view('mangas.index', compact('mangas'));
     }
 
+    /**
+     * Affiche la collection privée de l'utilisateur connecté.
+     * Les admins et modérateurs voient tous les mangas.
+     */
     public function myCollection()
     {
         $user = Auth::user();
@@ -53,12 +63,18 @@ class MangaController extends Controller
         return view('mangas.my-collection', compact('mangas', 'title'));
     }
 
+    /**
+     * Affiche le formulaire de création d'un manga.
+     */
     public function create()
     {
         $this->authorize('create', Manga::class);
         return view('mangas.create');
     }
 
+    /**
+     * Enregistre un nouveau manga dans la collection privée de l'utilisateur.
+     */
     public function store(Request $request)
     {
         $this->authorize('create', Manga::class);
@@ -86,6 +102,9 @@ class MangaController extends Controller
             ->with('success', 'Manga ajouté à votre collection !');
     }
 
+    /**
+     * Affiche le détail d'un manga. Les mangas privés ne sont accessibles qu'à leur propriétaire et aux modérateurs.
+     */
     public function show(Manga $manga)
     {
         if (!$manga->est_public) {
@@ -102,6 +121,9 @@ class MangaController extends Controller
         return view('mangas.show', compact('manga'));
     }
 
+    /**
+     * Affiche le formulaire d'édition d'un manga.
+     */
     public function edit(Manga $manga)
     {
         $this->authorize('update', $manga);
@@ -109,6 +131,9 @@ class MangaController extends Controller
         return view('mangas.edit', compact('manga'));
     }
 
+    /**
+     * Met à jour les informations d'un manga.
+     */
     public function update(Request $request, Manga $manga)
     {
         $this->authorize('update', $manga);
@@ -127,7 +152,7 @@ class MangaController extends Controller
                 'image' => 'image|mimes:jpeg,jpg,png,gif,webp|max:5120',
             ]);
 
-            if ($manga->image_couverture) {
+            if ($manga->image_couverture && Storage::disk('public')->exists($manga->image_couverture)) {
                 Storage::disk('public')->delete($manga->image_couverture);
             }
 
@@ -140,11 +165,14 @@ class MangaController extends Controller
             ->with('success', 'Manga mis à jour !');
     }
 
+    /**
+     * Supprime un manga et son image de couverture associée.
+     */
     public function destroy(Manga $manga)
     {
         $this->authorize('delete', $manga);
 
-        if ($manga->image_couverture) {
+        if ($manga->image_couverture && Storage::disk('public')->exists($manga->image_couverture)) {
             Storage::disk('public')->delete($manga->image_couverture);
         }
 
@@ -168,7 +196,9 @@ class MangaController extends Controller
 
         $existingPreview = $manga->previews()->where('ordre', $validated['ordre'])->first();
         if ($existingPreview) {
-            Storage::disk('public')->delete($existingPreview->image_path);
+            if (Storage::disk('public')->exists($existingPreview->image_path)) {
+                Storage::disk('public')->delete($existingPreview->image_path);
+            }
             $existingPreview->delete();
         }
 
@@ -190,7 +220,9 @@ class MangaController extends Controller
     {
         $this->authorize('uploadPreview', $manga);
 
-        Storage::disk('public')->delete($preview->image_path);
+        if (Storage::disk('public')->exists($preview->image_path)) {
+            Storage::disk('public')->delete($preview->image_path);
+        }
         $preview->delete();
 
         return redirect()->back()->with('success', 'Image de preview supprimée.');
