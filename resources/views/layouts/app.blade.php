@@ -140,6 +140,10 @@
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
                         </a>
+                        <a href="/docs/api" target="_blank" class="footer-admin-btn">
+                            <span class="admin-icon">📚</span>
+                            <span>Documentation</span>
+                        </a>
                     </div>
                 </div>
                 @endif
