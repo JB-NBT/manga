@@ -3,11 +3,25 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Manga;
 use App\Models\User;
 
 class MangaSeeder extends Seeder
 {
+    private function copyImage(string $slug): ?string
+    {
+        foreach (['jpg', 'png'] as $ext) {
+            $src = database_path("seeders/images/{$slug}.{$ext}");
+            if (file_exists($src)) {
+                $dest = "mangas/{$slug}.{$ext}";
+                Storage::disk('public')->put($dest, file_get_contents($src));
+                return $dest;
+            }
+        }
+        return null;
+    }
+
     public function run(): void
     {
         // Récupérer les users de test
@@ -32,6 +46,7 @@ class MangaSeeder extends Seeder
                 'statut' => 'en_cours',
                 'note' => 10,
                 'est_public' => false,
+                'image_couverture' => $this->copyImage('one_piece'),
             ],
             [
                 'titre' => 'Naruto',
@@ -41,6 +56,7 @@ class MangaSeeder extends Seeder
                 'statut' => 'termine',
                 'note' => 9,
                 'est_public' => false,
+                'image_couverture' => $this->copyImage('naruto'),
             ],
             [
                 'titre' => 'Death Note',
@@ -50,6 +66,7 @@ class MangaSeeder extends Seeder
                 'statut' => 'termine',
                 'note' => 10,
                 'est_public' => false,
+                'image_couverture' => $this->copyImage('death_note'),
             ],
         ];
 
@@ -70,6 +87,7 @@ class MangaSeeder extends Seeder
                 'statut' => 'termine',
                 'note' => 9,
                 'est_public' => false,
+                'image_couverture' => $this->copyImage('attack_on_titan'),
             ],
             [
                 'titre' => 'My Hero Academia',
@@ -79,6 +97,7 @@ class MangaSeeder extends Seeder
                 'statut' => 'en_cours',
                 'note' => 8,
                 'est_public' => false,
+                'image_couverture' => $this->copyImage('my_hero'),
             ],
         ];
 
@@ -102,6 +121,7 @@ class MangaSeeder extends Seeder
                 'est_public' => true,
                 'note_moyenne' => 8.5,
                 'nombre_avis' => 12,
+                'image_couverture' => $this->copyImage('demon_slayer'),
             ],
             [
                 'user_id' => $user2->id,
@@ -114,6 +134,7 @@ class MangaSeeder extends Seeder
                 'est_public' => true,
                 'note_moyenne' => 9.2,
                 'nombre_avis' => 25,
+                'image_couverture' => $this->copyImage('fullmetal'),
             ],
             [
                 'user_id' => $user1->id,
@@ -126,6 +147,7 @@ class MangaSeeder extends Seeder
                 'est_public' => true,
                 'note_moyenne' => 7.8,
                 'nombre_avis' => 18,
+                'image_couverture' => $this->copyImage('tokyo_ghoul'),
             ],
         ];
 

@@ -114,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
     // ========================================
     // ADMIN : Mangas interdits (Modérateur/Admin)
     // ========================================
-    Route::prefix('admin/mangas-interdits')->group(function () {
+    Route::prefix('admin/mangas-interdits')->middleware('permission:moderate avis')->group(function () {
         Route::get('/', [MangaInterditController::class, 'index'])->name('admin.mangas-interdits.index');
         Route::get('/create', [MangaInterditController::class, 'create'])->name('admin.mangas-interdits.create');
         Route::post('/', [MangaInterditController::class, 'store'])->name('admin.mangas-interdits.store');
