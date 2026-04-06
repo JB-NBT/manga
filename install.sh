@@ -70,7 +70,7 @@ composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Génération de la clé d'application
 info "Génération de la clé Laravel..."
-php artisan key:generate
+php artisan key:generate --force
 
 # Installation des dépendances JS et compilation des assets
 info "Installation des dépendances NPM..."
@@ -81,7 +81,11 @@ npm run build
 
 # Création de la base de données si elle n'existe pas
 info "Création de la base de données si nécessaire..."
-mysql -u"${DB_USER}" -p"${DB_PASS}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || warning "Impossible de créer la base automatiquement, vérifiez qu'elle existe."
+if [ -z "${DB_PASS}" ] && [ "${DB_USER}" = "root" ]; then
+    sudo mysql -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'localhost'; FLUSH PRIVILEGES;" 2>/dev/null || warning "Impossible de créer la base automatiquement, vérifiez qu'elle existe."
+else
+    mysql -u"${DB_USER}" -p"${DB_PASS}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || warning "Impossible de créer la base automatiquement, vérifiez qu'elle existe."
+fi
 
 # Migrations et seeders
 info "Exécution des migrations..."
