@@ -46,7 +46,6 @@ class Manga {
     + est_public : boolean
     + note_moyenne : decimal
     + nombre_avis : int
-    + date_derniere_republication : datetime
     + created_at : datetime
     + updated_at : datetime
     --
@@ -55,11 +54,6 @@ class Manga {
     + avis() : HasMany
     + publicationRequest() : HasOne
     + updateNoteMoyenne() : void
-    + isExpired() : bool
-    + unpublish() : void
-    + republish() : void
-    + scopeExpired(query) : Builder
-    + scopeExpiringSoon(query) : Builder
 }
 
 class Tome {

@@ -4,7 +4,6 @@ use App\Http\Controllers\MangaController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\PublicationRequestController;
 use App\Http\Controllers\TomeController;
-use App\Http\Controllers\Admin\CopyrightController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\MangaInterditController;
 use App\Http\Controllers\AdminUserController;
@@ -40,13 +39,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mangas/{manga}/edit', [MangaController::class, 'edit'])->name('mangas.edit');
     Route::put('/mangas/{manga}', [MangaController::class, 'update'])->name('mangas.update');
     Route::delete('/mangas/{manga}', [MangaController::class, 'destroy'])->name('mangas.destroy');
-
-    // ========================================
-    // REPUBLICATION (Modérateur uniquement)
-    // ========================================
-    Route::post('/mangas/{manga}/republish', [MangaController::class, 'republish'])
-        ->name('mangas.republish')
-        ->middleware('permission:republish expired manga');
 
     // ========================================
     // PREVIEW MANGA (Admin/Modérateur uniquement)
@@ -91,14 +83,6 @@ Route::middleware(['auth'])->group(function () {
 
         Route::post('/demandes-publication/{publicationRequest}/reject', [PublicationRequestController::class, 'reject'])
             ->name('admin.publication.reject');
-    });
-
-    // ========================================
-    // GESTION COPYRIGHT (Modérateur uniquement)
-    // ========================================
-    Route::middleware('permission:republish expired manga')->group(function () {
-        Route::get('/admin/copyright', [CopyrightController::class, 'index'])
-            ->name('admin.copyright.management');
     });
 
     // ========================================

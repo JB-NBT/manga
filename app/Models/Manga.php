@@ -12,8 +12,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -42,7 +40,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property bool        $est_public                  Manga public ou privé
  * @property float|null  $note_moyenne                Moyenne des avis
  * @property int         $nombre_avis                 Nombre d'avis
- * @property \DateTime|null $date_derniere_republication Date de dernière republication
  * @property \DateTime   $created_at                  Date de création
  * @property \DateTime   $updated_at                  Date de modification
  *
@@ -72,7 +69,6 @@ class Manga extends Model
         'est_public',
         'note_moyenne',
         'nombre_avis',
-        'date_derniere_republication',
     ];
 
     /**
@@ -83,7 +79,6 @@ class Manga extends Model
     protected $casts = [
         'est_public' => 'boolean',
         'note_moyenne' => 'decimal:1',
-        'date_derniere_republication' => 'datetime',
     ];
 
     /**
@@ -152,87 +147,4 @@ class Manga extends Model
         $this->save();
     }
 
-    /**
-     * Vérifie si le manga public a expiré (1 an sans republication).
-     *
-     * Un manga expire s'il est public et n'a pas été republié
-     * depuis plus d'un an.
-     *
-     * @return bool True si le manga a expiré
-     */
-    public function isExpired(): bool
-    {
-        if (!$this->est_public) {
-            return false;
-        }
-
-        if ($this->date_derniere_republication) {
-            return $this->date_derniere_republication->addYear()->isPast();
-        }
-
-        return $this->created_at->addYear()->isPast();
-    }
-
-    /**
-     * Retire le manga de la publication.
-     *
-     * Utilisé pour la protection des droits d'auteur.
-     *
-     * @return void
-     */
-    public function unpublish(): void
-    {
-        $this->update([
-            'est_public' => false,
-        ]);
-    }
-
-    /**
-     * Republie le manga (modérateur/admin uniquement).
-     *
-     * Remet le manga en public et met à jour la date de republication.
-     *
-     * @return void
-     */
-    public function republish(): void
-    {
-        $this->update([
-            'est_public' => true,
-            'date_derniere_republication' => now(),
-        ]);
-    }
-
-    /**
-     * Scope pour récupérer les mangas expirés.
-     *
-     * @param  Builder $query
-     * @return Builder
-     */
-    public function scopeExpired(Builder $query): Builder
-    {
-        return $query->where('est_public', true)
-            ->where(function ($q) {
-                $q->whereNull('date_derniere_republication')
-                  ->where('created_at', '<', Carbon::now()->subYear())
-                  ->orWhere('date_derniere_republication', '<', Carbon::now()->subYear());
-            });
-    }
-
-    /**
-     * Scope pour récupérer les mangas bientôt expirés (30 jours).
-     *
-     * @param  Builder $query
-     * @return Builder
-     */
-    public function scopeExpiringSoon(Builder $query): Builder
-    {
-        $dateLimit = Carbon::now()->subDays(335);
-
-        return $query->where('est_public', true)
-            ->where(function ($q) use ($dateLimit) {
-                $q->whereNull('date_derniere_republication')
-                  ->where('created_at', '<', $dateLimit)
-                  ->orWhere('date_derniere_republication', '<', $dateLimit);
-            });
-    }
 }

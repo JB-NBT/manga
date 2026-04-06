@@ -70,7 +70,6 @@
                                     @endcan
                                     <a href="{{ route('admin.tickets.index') }}" class="dropdown-item">Tickets</a>
                                     <a href="{{ route('admin.mangas-interdits.index') }}" class="dropdown-item">Interdits</a>
-                                    <a href="{{ route('admin.copyright.management') }}" class="dropdown-item">Copyright</a>
                                     @if(Auth::user()->hasRole('admin'))
                                         <div class="dropdown-divider"></div>
                                         <a href="{{ route('admin.users.index') }}" class="dropdown-item">Utilisateurs</a>

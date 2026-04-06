@@ -38,7 +38,6 @@ class RolePermissionSeeder extends Seeder
             // Permissions modérateur
             'edit any manga',           //MODÉRATEUR : Modifier n'importe quel manga
             'approve publications',      //MODÉRATEUR : Approuver les publications
-            'republish expired manga',   //MODÉRATEUR : Republier les mangas expirés
             
             // Permissions admin
             'manage users',
@@ -87,7 +86,6 @@ class RolePermissionSeeder extends Seeder
             'moderate avis',
             'edit any manga',           // ✅ MODÉRATEUR : Modifier tous les mangas
             'approve publications',      // ✅ MODÉRATEUR : Valider les publications
-            'republish expired manga',   // ✅ MODÉRATEUR : Republier les mangas expirés
             // ❌ PAS de 'delete any manga'
         ]);
 

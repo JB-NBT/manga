@@ -228,19 +228,4 @@ class MangaController extends Controller
         return redirect()->back()->with('success', 'Image de preview supprimée.');
     }
 
-    /**
-     * ✅ NOUVEAU : Republier un manga expiré (Modérateur/Admin)
-     */
-    public function republish(Manga $manga)
-    {
-        $this->authorize('republish', $manga);
-
-        if ($manga->est_public) {
-            return redirect()->back()->with('error', 'Ce manga est déjà public.');
-        }
-
-        $manga->republish();
-
-        return redirect()->back()->with('success', '✅ Manga republié avec succès !');
-    }
 }

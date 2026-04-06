@@ -96,7 +96,6 @@ class PublicationRequestController extends Controller
 
         $publicationRequest->manga->update([
             'est_public' => true,
-            'date_derniere_republication' => now(), // Initialise la date de publication
         ]);
 
         return redirect()->back()->with('success', 'Demande approuvée ! Le manga est maintenant public.');
