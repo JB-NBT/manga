@@ -80,6 +80,10 @@ class PublicationRequestController extends Controller
             abort(403, 'Action réservée aux modérateurs.');
         }
 
+        if ($publicationRequest->user_id === Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Vous ne pouvez pas approuver votre propre demande de publication.');
+        }
+
         $validated = $request->validate([
             'message_admin' => 'nullable|string|max:500',
         ]);
@@ -106,6 +110,10 @@ class PublicationRequestController extends Controller
     {
         if (!Auth::user()->hasPermissionTo('approve publications')) {
             abort(403, 'Action réservée aux modérateurs.');
+        }
+
+        if ($publicationRequest->user_id === Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Vous ne pouvez pas refuser votre propre demande de publication.');
         }
 
         $validated = $request->validate([
