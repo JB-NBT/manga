@@ -64,7 +64,7 @@ class PublicationRequestController extends Controller
 
         $requests = PublicationRequest::with(['manga', 'user'])
             ->where('statut', 'en_attente')
-            ->orderBy('created_at', 'desc')
+            ->orderBy('created_at', 'asc')
             ->paginate(20);
 
         return view('admin.publication-requests.index', compact('requests'));
@@ -80,6 +80,10 @@ class PublicationRequestController extends Controller
             abort(403, 'Action réservée aux modérateurs.');
         }
 
+        if ($publicationRequest->user_id === Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Vous ne pouvez pas approuver votre propre demande de publication.');
+        }
+
         $validated = $request->validate([
             'message_admin' => 'nullable|string|max:500',
         ]);
@@ -92,7 +96,6 @@ class PublicationRequestController extends Controller
 
         $publicationRequest->manga->update([
             'est_public' => true,
-            'date_derniere_republication' => now(), // Initialise la date de publication
         ]);
 
         return redirect()->back()->with('success', 'Demande approuvée ! Le manga est maintenant public.');
@@ -106,6 +109,10 @@ class PublicationRequestController extends Controller
     {
         if (!Auth::user()->hasPermissionTo('approve publications')) {
             abort(403, 'Action réservée aux modérateurs.');
+        }
+
+        if ($publicationRequest->user_id === Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Vous ne pouvez pas refuser votre propre demande de publication.');
         }
 
         $validated = $request->validate([

@@ -1,0 +1,108 @@
+@startuml Diagramme_Sequence_UC4_Avis_Notation
+title UC4 : Noter et commenter un manga public
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+skinparam participant {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+
+actor "Utilisateur" as U
+actor "Modérateur" as M
+participant "Vue (Blade)" as V
+participant "AvisController" as AC
+participant "Avis" as Avis
+participant "Manga" as Manga
+database "Base de données" as DB
+
+== Consultation des avis ==
+U -> V : GET /mangas/{manga}
+V -> AC : show(manga)
+activate AC
+AC -> DB : SELECT avis WHERE manga_id=?\nORDER BY created_at DESC
+DB --> AC : liste des avis
+AC --> V : page manga + avis + note moyenne
+deactivate AC
+V --> U : Fiche manga avec avis et étoiles
+
+== Ajout d'un avis ==
+U -> V : Saisit note (1-10) + commentaire\net clique "Publier"
+V -> AC : POST /mangas/{manga}/avis
+activate AC
+AC -> DB : SELECT * FROM avis\nWHERE manga_id=? AND user_id=?
+DB --> AC : résultat
+alt Avis déjà existant
+    AC --> V : redirect + "Vous avez déjà laissé un avis"
+    V --> U : Message d'erreur
+else Pas d'avis existant
+    AC -> Avis : create(manga_id, user_id, note, commentaire)
+    activate Avis
+    Avis -> DB : INSERT INTO avis
+    DB --> Avis : avis créé
+    deactivate Avis
+    AC -> Manga : recalculerNoyennne()
+    activate Manga
+    Manga -> DB : UPDATE mangas SET note_moyenne=AVG(note),\nnombre_avis=COUNT(*)
+    DB --> Manga : OK
+    deactivate Manga
+    AC --> V : redirect + "Avis publié"
+    deactivate AC
+    V --> U : Page manga avec nouvel avis
+end
+
+== Modification d'un avis ==
+U -> V : Clique "Modifier mon avis"
+V -> AC : PUT /avis/{avis}
+activate AC
+AC -> AC : Vérifie avis->user_id === Auth::id()
+AC -> Avis : update(note, commentaire)
+activate Avis
+Avis -> DB : UPDATE avis
+DB --> Avis : OK
+deactivate Avis
+AC -> Manga : recalculerMoyenne()
+Manga -> DB : UPDATE mangas SET note_moyenne, nombre_avis
+DB --> Manga : OK
+AC --> V : redirect + "Avis modifié"
+deactivate AC
+V --> U : Page manga mise à jour
+
+== Suppression d'un avis ==
+U -> V : Clique "Supprimer"
+V -> AC : DELETE /avis/{avis}
+activate AC
+AC -> AC : Vérifie avis->user_id === Auth::id()
+AC -> Avis : delete()
+activate Avis
+Avis -> DB : DELETE FROM avis WHERE id=?
+DB --> Avis : OK
+deactivate Avis
+AC -> Manga : recalculerMoyenne()
+Manga -> DB : UPDATE mangas SET note_moyenne, nombre_avis
+DB --> Manga : OK
+AC --> V : redirect + "Avis supprimé"
+deactivate AC
+V --> U : Page manga sans l'avis
+
+== Modération d'un avis ==
+M -> V : GET /admin/avis
+V -> AC : index()
+activate AC
+AC -> DB : SELECT * FROM avis ORDER BY created_at DESC
+DB --> AC : tous les avis
+AC --> V : vue modération
+deactivate AC
+V --> M : Liste des avis
+
+M -> V : Clique "Masquer"
+V -> AC : POST /avis/{avis}/moderate
+activate AC
+AC -> Avis : update(masque=true)
+Avis -> DB : UPDATE avis SET masque=1
+DB --> Avis : OK
+AC --> V : redirect + "Avis masqué"
+deactivate AC
+V --> M : Confirmation
+
+@enduml

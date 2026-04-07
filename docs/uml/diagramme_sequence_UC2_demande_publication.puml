@@ -1,0 +1,67 @@
+@startuml Diagramme_Sequence_UC2_Demande_Publication
+title UC2 : Demander la publication d'un manga
+
+skinparam backgroundColor #FEFEFE
+skinparam sequenceArrowThickness 2
+skinparam participant {
+    BackgroundColor #E8F4FD
+    BorderColor #2980B9
+}
+
+actor "Utilisateur" as U
+participant "Vue (Blade)" as V
+participant "PublicationRequestController" as PRC
+participant "MangaInterdit" as MI
+participant "PublicationRequest" as PR
+database "Base de données" as DB
+
+== Accès au formulaire ==
+U -> V : Clique sur "Demander la publication"\n(page détail manga)
+V -> PRC : POST /mangas/{manga}/demande-publication
+activate PRC
+
+== Vérification du titre interdit ==
+PRC -> MI : verifierInterdit(titre)
+activate MI
+MI -> DB : SELECT * FROM mangas_interdits\nWHERE titre LIKE ?
+DB --> MI : résultat
+alt Titre interdit
+    MI --> PRC : interdit = true
+    PRC --> V : redirect + "Ce manga est interdit de publication"
+    V --> U : Message d'erreur
+else Titre autorisé
+    MI --> PRC : null
+    deactivate MI
+
+    == Vérification demande existante ==
+    PRC -> DB : SELECT * FROM publication_requests\nWHERE manga_id=? AND statut="en_attente"
+    DB --> PRC : résultat
+    alt Demande déjà en attente
+        PRC --> V : redirect + "Une demande est déjà en cours"
+        V --> U : Message d'erreur
+    else Aucune demande en cours
+
+        == Création de la demande ==
+        PRC -> PR : create(manga_id, user_id,\nstatut="en_attente", message)
+        activate PR
+        PR -> DB : INSERT INTO publication_requests
+        DB --> PR : demande créée
+        PR --> PRC : PublicationRequest
+        deactivate PR
+        PRC --> V : redirect("/mes-demandes") + succès
+        deactivate PRC
+        V --> U : "Demande envoyée avec succès"
+    end
+end
+
+== Consultation de ses demandes ==
+U -> V : GET /mes-demandes
+V -> PRC : myRequests()
+activate PRC
+PRC -> DB : SELECT * FROM publication_requests\nWHERE user_id = Auth::id()\nORDER BY created_at DESC
+DB --> PRC : liste des demandes
+PRC --> V : vue avec statuts (en_attente / approuvé / refusé)
+deactivate PRC
+V --> U : Tableau des demandes
+
+@enduml

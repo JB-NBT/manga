@@ -119,6 +119,10 @@ class TicketController extends Controller
             abort(403, 'Action réservée aux modérateurs.');
         }
 
+        if ($ticket->user_id === Auth::id() && !Auth::user()->hasRole('admin')) {
+            abort(403, 'Vous ne pouvez pas traiter votre propre ticket.');
+        }
+
         $validated = $request->validate([
             'reponse_moderateur' => 'required|string|max:2000',
             'statut' => 'required|in:en_cours,resolu,ferme',
@@ -146,6 +150,7 @@ class TicketController extends Controller
         if ($ticket->user_id !== Auth::id() && !Auth::user()->hasPermissionTo('moderate avis')) {
             abort(403, 'Vous ne pouvez pas fermer ce ticket.');
         }
+
 
         $ticket->update([
             'statut' => 'ferme',

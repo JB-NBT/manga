@@ -55,15 +55,6 @@ class MangaPolicy
     }
 
     /**
-     * MODÉRATEUR peut republier un manga expiré
-     * ADMIN ne peut PAS republier (gestion de contenu = modérateur)
-     */
-    public function republish(User $user, Manga $manga): bool
-    {
-        return $user->hasPermissionTo('republish expired manga');
-    }
-
-    /**
      * Seuls admin et modérateur peuvent ajouter/supprimer les images de preview
      */
     public function uploadPreview(User $user, Manga $manga): bool

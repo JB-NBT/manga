@@ -12,6 +12,7 @@
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ route('home') }}" class="navbar-brand">
+                <img src="{{ asset('images/logo.png') }}" alt="Logo" style="height: 40px;">
                 <span class="logo-text">Manga<span class="accent">Library</span></span>
             </a>
 
@@ -69,7 +70,6 @@
                                     @endcan
                                     <a href="{{ route('admin.tickets.index') }}" class="dropdown-item">Tickets</a>
                                     <a href="{{ route('admin.mangas-interdits.index') }}" class="dropdown-item">Interdits</a>
-                                    <a href="{{ route('admin.copyright.management') }}" class="dropdown-item">Copyright</a>
                                     @if(Auth::user()->hasRole('admin'))
                                         <div class="dropdown-divider"></div>
                                         <a href="{{ route('admin.users.index') }}" class="dropdown-item">Utilisateurs</a>
@@ -132,13 +132,17 @@
                 <div class="footer-admin-section">
                     <div class="footer-admin-title">Outils Administration</div>
                     <div class="footer-admin-buttons">
-                        <a href="/phpmyadmin" target="_blank" class="footer-admin-btn">
+                        <a href="http://localhost/phpmyadmin" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🗄️</span>
                             <span>phpMyAdmin</span>
                         </a>
-                        <a href="http://glpi.local" target="_blank" class="footer-admin-btn">
+                        <a href="http://192.168.56.111:8080" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🎫</span>
                             <span>GLPI</span>
+                        </a>
+                        <a href="/docs/api" target="_blank" class="footer-admin-btn">
+                            <span class="admin-icon">📚</span>
+                            <span>Documentation</span>
                         </a>
                     </div>
                 </div>

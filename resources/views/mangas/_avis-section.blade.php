@@ -44,7 +44,7 @@
                             @for($i = 1; $i <= 10; $i++)
                                 <label style="cursor: pointer;">
                                     <input type="radio" name="note" value="{{ $i }}" required style="display: none;" class="note-radio">
-                                    <span class="note-star" data-value="{{ $i }}" style="font-size: 1.5rem; color: var(--text-secondary); transition: color 0.2s;">⭐</span>
+                                    <span class="note-star" data-value="{{ $i }}" style="font-size: 1.5rem; color: var(--text-secondary); transition: color 0.2s;">★</span>
                                 </label>
                             @endfor
                         </div>
@@ -213,15 +213,16 @@ document.addEventListener('DOMContentLoaded', function() {
             stars.forEach((s, i) => {
                 if (i < value) {
                     s.style.color = 'var(--warning)';
+                } else {
+                    s.style.color = 'var(--text-secondary)';
                 }
             });
         });
     });
-    
-    const form = document.querySelector('form');
-    if (form) {
-        form.addEventListener('mouseleave', function() {
-            // Réafficher la sélection active
+
+    const starsContainer = stars[0] ? stars[0].closest('div') : null;
+    if (starsContainer) {
+        starsContainer.addEventListener('mouseleave', function() {
             const checked = document.querySelector('.note-radio:checked');
             if (checked) {
                 const value = checked.value;

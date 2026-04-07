@@ -4,7 +4,6 @@ use App\Http\Controllers\MangaController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\PublicationRequestController;
 use App\Http\Controllers\TomeController;
-use App\Http\Controllers\Admin\CopyrightController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\MangaInterditController;
 use App\Http\Controllers\AdminUserController;
@@ -40,13 +39,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/mangas/{manga}/edit', [MangaController::class, 'edit'])->name('mangas.edit');
     Route::put('/mangas/{manga}', [MangaController::class, 'update'])->name('mangas.update');
     Route::delete('/mangas/{manga}', [MangaController::class, 'destroy'])->name('mangas.destroy');
-
-    // ========================================
-    // REPUBLICATION (Modérateur uniquement)
-    // ========================================
-    Route::post('/mangas/{manga}/republish', [MangaController::class, 'republish'])
-        ->name('mangas.republish')
-        ->middleware('permission:republish expired manga');
 
     // ========================================
     // PREVIEW MANGA (Admin/Modérateur uniquement)
@@ -94,14 +86,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // ========================================
-    // GESTION COPYRIGHT (Modérateur uniquement)
-    // ========================================
-    Route::middleware('permission:republish expired manga')->group(function () {
-        Route::get('/admin/copyright', [CopyrightController::class, 'index'])
-            ->name('admin.copyright.management');
-    });
-
-    // ========================================
     // TOMES
     // ========================================
     Route::get('/mangas/{manga}/tomes', [TomeController::class, 'index'])->name('tomes.index');
@@ -130,7 +114,7 @@ Route::middleware(['auth'])->group(function () {
     // ========================================
     // ADMIN : Mangas interdits (Modérateur/Admin)
     // ========================================
-    Route::prefix('admin/mangas-interdits')->group(function () {
+    Route::prefix('admin/mangas-interdits')->middleware('permission:moderate avis')->group(function () {
         Route::get('/', [MangaInterditController::class, 'index'])->name('admin.mangas-interdits.index');
         Route::get('/create', [MangaInterditController::class, 'create'])->name('admin.mangas-interdits.create');
         Route::post('/', [MangaInterditController::class, 'store'])->name('admin.mangas-interdits.store');
