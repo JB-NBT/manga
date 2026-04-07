@@ -132,7 +132,7 @@
                 <div class="footer-admin-section">
                     <div class="footer-admin-title">Outils Administration</div>
                     <div class="footer-admin-buttons">
-                        <a href="/phpmyadmin" target="_blank" class="footer-admin-btn">
+                        <a href="http://localhost/phpmyadmin" target="_blank" class="footer-admin-btn">
                             <span class="admin-icon">🗄️</span>
                             <span>phpMyAdmin</span>
                         </a>

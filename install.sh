@@ -102,6 +102,28 @@ info "Application des permissions..."
 chmod -R 775 storage bootstrap/cache
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
 
+# Installation de phpMyAdmin
+info "Installation de phpMyAdmin..."
+# Désactiver temporairement la politique de mot de passe MySQL pour que dbconfig puisse créer son user
+sudo mysql -e "SET GLOBAL validate_password.policy=LOW; SET GLOBAL validate_password.length=4;" 2>/dev/null || true
+sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/dbconfig-install boolean true"
+sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/app-password-confirm password phpmyadmin"
+sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/admin-pass password "
+sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/mysql/app-pass password phpmyadmin"
+sudo debconf-set-selections <<< "phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2"
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y phpmyadmin
+# Activer la conf Apache phpMyAdmin
+if [ -f /etc/phpmyadmin/apache.conf ] && [ ! -f /etc/apache2/conf-available/phpmyadmin.conf ]; then
+    sudo ln -sf /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
+fi
+if [ -f /etc/apache2/conf-available/phpmyadmin.conf ]; then
+    sudo a2enconf phpmyadmin
+    sudo systemctl reload apache2
+fi
+# Remettre la politique de mot de passe MySQL
+sudo mysql -e "SET GLOBAL validate_password.policy=MEDIUM; SET GLOBAL validate_password.length=8;" 2>/dev/null || true
+info "phpMyAdmin installé et accessible sur /phpmyadmin"
+
 echo ""
 echo "============================================"
 echo -e "${GREEN}   Installation terminée avec succès !${NC}"
