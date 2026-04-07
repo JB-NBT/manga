@@ -52,7 +52,7 @@ APP_URL=${APP_URL:-http://localhost}
 
 # Création du user MySQL dédié via sudo mysql (socket auth)
 DB_USER="manga_user"
-DB_PASS="MangaLibrary2024!"
+DB_PASS="Akeltroll24072018!"
 
 info "Création de la base de données et de l'utilisateur MySQL..."
 sudo mysql <<EOF
