@@ -30,10 +30,10 @@ return new class extends Migration
             $table->foreign('tome_id')->references('id')->on('tomes')->onDelete('cascade');
 
             // Index
-            $table->index('preteur_id');
-            $table->index('emprunteur_id');
-            $table->index('tome_id');
-            $table->index('statut');
+            //*$table->index('preteur_id');
+            // $table->index('emprunteur_id');
+            // $table->index('tome_id');
+            // $table->index('statut');
         });
     }
 

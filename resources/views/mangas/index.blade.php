@@ -2,7 +2,7 @@
 @section('title', 'Accueil - MangaLibrary')
 @section('content')
     <div class="page-header">
-        <h1>Bibliothèque</h1>
+        <h1>Ma Bibliothèque</h1>
         @if(request('search'))
             <p class="search-info">Résultats pour "{{ request('search') }}" ({{ $mangas->total() }} manga(s))</p>
         @endif
@@ -119,7 +119,6 @@
                     @endif
                 @endauth
 
-                {{-- Modal emprunt pour la carte (users connectés seulement) --}}
                 @auth
                     @if($tomesPartages->count() > 0)
                         <div id="empruntModal-{{ $manga->id }}" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)this.style.display='none'">
