@@ -95,7 +95,7 @@ class MangaController extends Controller
         }
 
         $validated['user_id'] = Auth::id();
-        $validated['est_public'] = false;
+        $validated['est_public'] = true;
 
         // Créer le manga
         $manga = Manga::create($validated);
