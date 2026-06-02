@@ -51,9 +51,9 @@
                                 Prêts <span class="dropdown-arrow" style="font-size: 0.7rem;">▼</span>
                             </button>
                             <div class="dropdown-menu">
-                                <a href="{{ route('prets.demandes-recues') }}" class="dropdown-item">Demandes reçues</a>
+                                <a href="{{ route('prets.demandes-recues') }}" class="dropdown-item">Demandes recues</a>
                                 <a href="{{ route('prets.mes-emprunts') }}" class="dropdown-item">Mes emprunts</a>
-                                <a href="{{ route('prets.mes-prets') }}" class="dropdown-item">Mes prêts</a>
+                                <a href="{{ route('prets.mes-prets') }}" class="dropdown-item">Mes prets</a>
                             </div>
                         </div>
                     </div>
