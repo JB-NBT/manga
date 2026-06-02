@@ -40,6 +40,47 @@
                             <span>{{ $manga->user->name }}</span>
                             <span>{{ $manga->nombre_tomes }} tome(s)</span>
                         </div>
+
+                        {{-- Affichage des statuts de tomes partagés --}}
+                        @php
+                            $tomesPartages = $manga->tomes->filter(function($t) { return $t->partage; });
+                        @endphp
+                        @if($tomesPartages->count() > 0)
+                            <div style="margin: 0.8rem 0; padding: 0.6rem; background-color: rgba(16, 185, 129, 0.1); border-radius: 6px;">
+                                <p style="color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.4rem; font-weight: bold;">
+                                    📚 Tomes disponibles au prêt :
+                                </p>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                                    @foreach($tomesPartages as $tome)
+                                        <span class="badge" style="
+                                            background-color: {{ \App\Helpers\PretHelper::couleurStatut($tome->statut_pret) }};
+                                            color: white;
+                                            padding: 0.3rem 0.6rem;
+                                            border-radius: 4px;
+                                            font-size: 0.75rem;
+                                            font-weight: bold;
+                                        ">
+                                            T{{ $tome->numero }}:
+                                            @switch($tome->statut_pret)
+                                                @case('disponible')
+                                                    ✓
+                                                    @break
+                                                @case('demande')
+                                                    ⏳
+                                                    @break
+                                                @case('prete')
+                                                    📤
+                                                    @break
+                                                @case('restitue')
+                                                    ↩
+                                                    @break
+                                            @endswitch
+                                        </span>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endif
+
                         <div class="manga-card-actions">
                             <a href="{{ route('mangas.show', $manga) }}" class="btn-card btn-details">Details</a>
                             @auth

@@ -23,7 +23,7 @@ class MangaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Manga::where('est_public', true)->with(['user', 'previews']);
+        $query = Manga::where('est_public', true)->with(['user', 'previews', 'tomes']);
 
         if ($request->has('search') && $request->search) {
             $search = $request->search;
