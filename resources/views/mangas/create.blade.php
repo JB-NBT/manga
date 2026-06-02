@@ -59,6 +59,15 @@
                 <input type="number" name="note" id="note" class="form-control" value="{{ old('note') }}" min="1" max="10">
             </div>
 
+            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" name="partage_manga" id="partage_manga" class="form-checkbox" value="1" {{ old('partage_manga') ? 'checked' : '' }}>
+                <label for="partage_manga" class="form-label" style="margin: 0; font-weight: 500;">Partager tous mes tomes pour des prêts</label>
+            </div>
+
+            <small style="color: var(--text-secondary); font-size: 0.85rem; display: block; margin-top: -0.8rem;">
+                ✓ Vos tomes seront visibles dans la bibliothèque commune et pourront être empruntés
+            </small>
+
             <div style="display: flex; gap: 1rem;">
                 <button type="submit" class="btn-primary" style="flex: 1;">Ajouter le manga</button>
                 <a href="{{ route('mangas.my-collection') }}" class="btn-primary" style="flex: 1; text-align: center; background-color: var(--bg-hover);">

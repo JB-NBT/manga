@@ -87,6 +87,7 @@ class MangaController extends Controller
             'statut' => 'required|in:en_cours,termine,abandonne',
             'note' => 'nullable|integer|min:1|max:10',
             'image' => 'nullable|file|mimes:jpeg,jpg,png,gif,webp,bmp|max:5120',
+            'partage_manga' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
@@ -96,7 +97,21 @@ class MangaController extends Controller
         $validated['user_id'] = Auth::id();
         $validated['est_public'] = false;
 
-        Manga::create($validated);
+        // Créer le manga
+        $manga = Manga::create($validated);
+
+        // Créer les tomes avec le statut de partage
+        $isPartage = (bool) ($validated['partage_manga'] ?? false);
+        $statutInitial = $isPartage ? 'disponible' : 'non_partage';
+
+        for ($i = 1; $i <= $validated['nombre_tomes']; $i++) {
+            $manga->tomes()->create([
+                'numero' => $i,
+                'possede' => false,
+                'partage' => $isPartage,
+                'statut_pret' => $statutInitial,
+            ]);
+        }
 
         return redirect()->route('mangas.my-collection')
             ->with('success', 'Manga ajouté à votre collection !');

@@ -54,7 +54,7 @@
         </div>
 
         <!-- Grille des tomes -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem;">
             @foreach($tomes as $tome)
                 <div class="tome-card" style="
                     background-color: var(--bg-card);
@@ -64,7 +64,36 @@
                     border: 2px solid {{ $tome->possede ? 'var(--success)' : 'var(--border)' }};
                     transition: all 0.3s ease;
                     cursor: pointer;
+                    position: relative;
                 " onclick="toggleTome({{ $tome->id }})">
+                    <!-- Badge statut prêt -->
+                    @if($tome->partage && $tome->statut_pret !== 'non_partage')
+                        <div style="position: absolute; top: 0.5rem; right: 0.5rem; font-size: 0.8rem;">
+                            <span class="badge" style="
+                                background-color: {{ \App\Helpers\PretHelper::couleurStatut($tome->statut_pret) }};
+                                color: white;
+                                padding: 0.35rem 0.6rem;
+                                border-radius: 4px;
+                                font-weight: bold;
+                            ">
+                                @switch($tome->statut_pret)
+                                    @case('disponible')
+                                        ✓ Dispo
+                                        @break
+                                    @case('demande')
+                                        ⏳ Demande
+                                        @break
+                                    @case('prete')
+                                        📤 Prêté
+                                        @break
+                                    @case('restitue')
+                                        ↩ Restitué
+                                        @break
+                                @endswitch
+                            </span>
+                        </div>
+                    @endif
+
                     <div style="font-size: 2rem; margin-bottom: 0.5rem;">
                         {{ $tome->possede ? '✅' : '📖' }}
                     </div>
@@ -74,6 +103,16 @@
                     <p style="color: var(--text-secondary); font-size: 0.85rem;">
                         {{ $tome->possede ? 'Possédé' : 'Non possédé' }}
                     </p>
+
+                    @if($tome->partage)
+                        <p style="color: var(--accent); font-size: 0.8rem; margin-top: 0.5rem; font-weight: bold;">
+                            📤 Partagé
+                        </p>
+                    @else
+                        <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.5rem;">
+                            Privé
+                        </p>
+                    @endif
 
                     @if($tome->possede && $tome->date_achat)
                         <p style="color: var(--text-secondary); font-size: 0.75rem; margin-top: 0.5rem;">
