@@ -44,6 +44,18 @@
                             <a href="{{ route('mangas.create') }}" class="nav-link {{ request()->routeIs('mangas.create') ? 'active' : '' }}">Ajouter</a>
                         @endcan
                         <a href="{{ route('tickets.index') }}" class="nav-link {{ request()->routeIs('tickets.*') ? 'active' : '' }}">Support</a>
+                        
+                        <!-- Dropdown Prêts -->
+                        <div class="dropdown" style="display: inline-block;">
+                            <button class="nav-link dropdown-toggle" style="background: none; border: none; cursor: pointer;">
+                                Prêts <span class="dropdown-arrow" style="font-size: 0.7rem;">▼</span>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a href="{{ route('prets.demandes-recues') }}" class="dropdown-item">Demandes reçues</a>
+                                <a href="{{ route('prets.mes-emprunts') }}" class="dropdown-item">Mes emprunts</a>
+                                <a href="{{ route('prets.mes-prets') }}" class="dropdown-item">Mes prêts</a>
+                            </div>
+                        </div>
                     </div>
 
                     @if(Auth::user()->hasAnyRole(['admin', 'moderator']))

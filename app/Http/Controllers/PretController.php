@@ -93,6 +93,9 @@ class PretController extends Controller
             'date_demande' => now()->toDateString(),
         ]);
 
+        // Mettre à jour le statut du tome à 'demande'
+        $tome->update(['statut_pret' => 'demande']);
+
         return back()->with('success', 'Demande de prêt envoyée avec succès !');
     }
 
@@ -134,6 +137,9 @@ class PretController extends Controller
             'statut' => 'refuse',
             'motif_refus' => $validated['motif_refus'],
         ]);
+
+        // Revenir le tome à 'disponible'
+        $pret->tome->update(['statut_pret' => 'disponible']);
 
         return back()->with('success', 'Demande refusée.');
     }
