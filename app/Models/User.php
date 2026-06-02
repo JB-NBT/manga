@@ -40,6 +40,8 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read \Illuminate\Database\Eloquent\Collection|Manga[] $mangas
  * @property-read \Illuminate\Database\Eloquent\Collection|Ticket[] $tickets
  * @property-read \Illuminate\Database\Eloquent\Collection|Avis[] $avis
+ * @property-read \Illuminate\Database\Eloquent\Collection|Pret[] $prets
+ * @property-read \Illuminate\Database\Eloquent\Collection|Pret[] $emprunts
  */
 class User extends Authenticatable
 {
@@ -107,5 +109,25 @@ class User extends Authenticatable
     public function avis(): HasMany
     {
         return $this->hasMany(Avis::class);
+    }
+
+    /**
+     * Récupère tous les prêts que l'utilisateur a donnés.
+     *
+     * @return HasMany<Pret>
+     */
+    public function prets(): HasMany
+    {
+        return $this->hasMany(Pret::class, 'preteur_id');
+    }
+
+    /**
+     * Récupère tous les emprunts que l'utilisateur a effectués.
+     *
+     * @return HasMany<Pret>
+     */
+    public function emprunts(): HasMany
+    {
+        return $this->hasMany(Pret::class, 'emprunteur_id');
     }
 }

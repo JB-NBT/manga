@@ -89,6 +89,11 @@
                                         Preview
                                     </button>
                                 @endif
+                                @if($tomesPartages->count() > 0)
+                                    <button onclick="document.getElementById('empruntModal-{{ $manga->id }}').style.display='flex'" class="btn-card" style="background-color: var(--success); color: white;">
+                                        📤 Emprunter
+                                    </button>
+                                @endif
                             @endauth
                         </div>
                     </div>
@@ -107,6 +112,47 @@
                                             <p style="color:var(--text-secondary); margin-bottom:0.5rem; font-size:0.9rem;">Page {{ $preview->ordre }}</p>
                                             <img src="{{ asset('storage/' . $preview->image_path) }}" alt="Preview page {{ $preview->ordre }}" class="preview-img" style="max-width:380px; width:100%; border-radius:8px; border:2px solid var(--border); cursor:zoom-in;">
                                         </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endauth
+
+                {{-- Modal emprunt pour la carte (users connectés seulement) --}}
+                @auth
+                    @if($tomesPartages->count() > 0)
+                        <div id="empruntModal-{{ $manga->id }}" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;" onclick="if(event.target===this)this.style.display='none'">
+                            <div style="background:var(--bg-card); border-radius:12px; padding:2rem; max-width:500px; width:95%; position:relative;">
+                                <button onclick="document.getElementById('empruntModal-{{ $manga->id }}').style.display='none'" style="position:absolute; top:1rem; right:1rem; background:var(--accent); color:#fff; border:none; border-radius:50%; width:2rem; height:2rem; cursor:pointer; font-size:1rem; line-height:1;">✕</button>
+                                
+                                <h2 style="color:var(--accent); margin-bottom:1.5rem;">📤 Emprunter un tome</h2>
+                                <p style="color:var(--text-secondary); margin-bottom:1.5rem;">{{ $manga->titre }} — de {{ $manga->auteur }}</p>
+                                
+                                <p style="color:var(--text-secondary); margin-bottom:1rem; font-size:0.9rem;">Sélectionnez un tome :</p>
+                                
+                                <div style="display: grid; gap: 0.8rem; max-height: 300px; overflow-y: auto;">
+                                    @foreach($tomesPartages as $tome)
+                                        <form action="{{ route('prets.store', $tome) }}" method="POST" style="display: grid; grid-template-columns: 1fr auto; gap: 1rem; align-items: center; padding: 1rem; background-color: var(--bg-hover); border-radius: 8px; border: 2px solid var(--border);">
+                                            @csrf
+                                            <div>
+                                                <p style="color: var(--text-primary); font-weight: bold; margin-bottom: 0.25rem;">Tome {{ $tome->numero }}</p>
+                                                <p style="color: var(--text-secondary); font-size: 0.85rem;">
+                                                    <span style="background-color: {{ \App\Helpers\PretHelper::couleurStatut($tome->statut_pret) }}; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.75rem;">
+                                                        {{ \App\Helpers\PretHelper::labelStatut($tome->statut_pret) }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                            @if($tome->statut_pret === 'disponible')
+                                                <button type="submit" class="btn-primary" style="background-color: var(--success); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">
+                                                    Demander
+                                                </button>
+                                            @else
+                                                <button type="button" disabled class="btn-primary" style="background-color: var(--text-secondary); color: white; padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: not-allowed; opacity: 0.5;">
+                                                    Non dispo
+                                                </button>
+                                            @endif
+                                        </form>
                                     @endforeach
                                 </div>
                             </div>

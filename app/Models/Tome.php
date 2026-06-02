@@ -16,6 +16,7 @@ use App\Enums\StatutPret;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Modèle Tome - Représente un tome d'un manga
@@ -77,5 +78,15 @@ class Tome extends Model
     public function manga(): BelongsTo
     {
         return $this->belongsTo(Manga::class);
+    }
+
+    /**
+     * Récupère tous les prêts associés à ce tome.
+     *
+     * @return HasMany<Pret>
+     */
+    public function prets(): HasMany
+    {
+        return $this->hasMany(Pret::class);
     }
 }

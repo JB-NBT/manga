@@ -4,6 +4,7 @@ use App\Http\Controllers\MangaController;
 use App\Http\Controllers\AvisController;
 use App\Http\Controllers\PublicationRequestController;
 use App\Http\Controllers\TomeController;
+use App\Http\Controllers\PretController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\MangaInterditController;
 use App\Http\Controllers\AdminUserController;
@@ -92,6 +93,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/mangas/{manga}/tomes/generate', [TomeController::class, 'generateTomes'])->name('tomes.generate');
     Route::post('/tomes/{tome}/toggle', [TomeController::class, 'togglePossede'])->name('tomes.toggle');
     Route::put('/tomes/{tome}', [TomeController::class, 'update'])->name('tomes.update');
+
+    // ========================================
+    // PRÊTS DE TOMES
+    // ========================================
+    Route::post('/tomes/{tome}/demander-pret', [PretController::class, 'store'])->name('prets.store');
+    Route::get('/mes-emprunts', [PretController::class, 'mesEmprunts'])->name('prets.mes-emprunts');
+    Route::get('/mes-prets', [PretController::class, 'mesPrets'])->name('prets.mes-prets');
+    Route::get('/demandes-recues', [PretController::class, 'demandesRecues'])->name('prets.demandes-recues');
+
+    Route::post('/prets/{pret}/accepter', [PretController::class, 'accepter'])->name('prets.accepter');
+    Route::post('/prets/{pret}/refuser', [PretController::class, 'refuser'])->name('prets.refuser');
+    Route::post('/prets/{pret}/restituer', [PretController::class, 'restituer'])->name('prets.restituer');
+    Route::delete('/prets/{pret}/annuler', [PretController::class, 'annulerDemande'])->name('prets.annuler');
 
     // ========================================
     // TICKETS (Support utilisateur)
